@@ -237,7 +237,7 @@ final class PetWindowController {
     /// does not wander, follow, or fall asleep.
     func park() {
         guard let screen = NSScreen.main else { return }
-        parkWalkTarget = (x: screen.frame.minX + 12, y: screen.frame.minY)
+        parkWalkTarget = (x: Double(screen.frame.minX) + 12, y: Double(screen.frame.minY))
         behavior.setParked(true)
         walkTarget = nil
         let walkFrames = PixelPetGenerator.frames(for: .walk)
