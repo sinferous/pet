@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
         autoStart = AutoStartManager()
         waterReminder = WaterReminderManager(behavior: behavior)
+        waterReminder?.intervalMinutes = settings.waterIntervalMinutes
         if settings.waterReminders { waterReminder?.enable() }
 
         petWindowController = PetWindowController(behavior: behavior)
@@ -38,7 +39,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             settings: settings,
             sleepPreventer: sleepPreventer!,
             autoStart: autoStart!,
-            waterReminder: waterReminder!)
+            waterReminder: waterReminder!,
+            behavior: behavior,
+            parkHandler: { [weak petWindowController] parked in
+                if parked {
+                    petWindowController?.park()
+                } else {
+                    petWindowController?.unpark()
+                }
+            })
     }
 
     func applicationWillTerminate(_ notification: Notification) {

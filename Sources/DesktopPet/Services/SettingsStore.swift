@@ -10,6 +10,7 @@ final class SettingsStore {
     private enum Key: String {
         case sleepPrevention
         case waterReminders
+        case waterIntervalMinutes
         case autoStart
     }
 
@@ -23,6 +24,17 @@ final class SettingsStore {
     var waterReminders: Bool {
         get { defaults.object(forKey: Key.waterReminders.rawValue) as? Bool ?? true } // on by default
         set { defaults.set(newValue, forKey: Key.waterReminders.rawValue) }
+    }
+
+    /// Minutes between hydration alerts. Clamped to 1...1440 (default 60).
+    var waterIntervalMinutes: Int {
+        get {
+            let stored = defaults.object(forKey: Key.waterIntervalMinutes.rawValue) as? Int ?? 60
+            return min(1440, max(1, stored))
+        }
+        set {
+            defaults.set(min(1440, max(1, newValue)), forKey: Key.waterIntervalMinutes.rawValue)
+        }
     }
 
     var autoStart: Bool {

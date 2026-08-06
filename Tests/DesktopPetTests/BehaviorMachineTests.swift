@@ -92,6 +92,43 @@ final class BehaviorMachineTests: XCTestCase {
         XCTAssertEqual(m.state, .idle)
     }
 
+    func testParkedForcesIdleAndSuppressesMovement() {
+        let m = makeMachine(roll: 0.10) // would run
+        m.setParked(true)
+        XCTAssertEqual(m.state, .idle)
+        advance(m, by: 10)
+        XCTAssertEqual(m.state, .idle) // parked: no run/walk decisions
+        m.setParked(false)
+        advance(m, by: 1)
+        XCTAssertEqual(m.state, .run) // resumes moving immediately
+    }
+
+    func testParkingForcesIdleFromWalk() {
+        let m = makeMachine(roll: 0.3)
+        advance(m, by: 5) // walk
+        XCTAssertEqual(m.state, .walk)
+        m.setParked(true)
+        XCTAssertEqual(m.state, .idle)
+    }
+
+    func testParkedSuppressesFollow() {
+        let m = makeMachine(roll: 0.5)
+        m.setParked(true)
+        m.setCursor(inRange: true)
+        XCTAssertEqual(m.state, .idle) // no follow while parked
+        m.setParked(false)
+        m.setCursor(inRange: true)
+        XCTAssertEqual(m.state, .follow) // follow works again
+    }
+
+    func testTriggerActivityFromMenu() {
+        let m = makeMachine(roll: 0.5)
+        m.triggerActivity(.roll)
+        XCTAssertEqual(m.state, .roll)
+        m.triggerActivity(.drink)
+        XCTAssertEqual(m.state, .drink)
+    }
+
     func testLongIdleFallsAsleepAndClickWakesIt() {
         let m = makeMachine(roll: 0.5, idleDelay: 1000, sleepAfter: 10)
         advance(m, by: 10)

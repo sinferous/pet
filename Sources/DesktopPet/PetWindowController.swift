@@ -17,6 +17,7 @@ final class PetWindowController {
     private var facing: Facing = .right
     private var currentScreenIndex: Int = 0
     private var walkTarget: WalkTarget?
+    private var parkWalkTarget: (x: Double, y: Double)? // stroll-to corner before parking
     private let walkSpeed: Double = 1.5 // points per frame (~90 px/s at 60 fps)
     private let runSpeed: Double = 4.0
     private let rollSpeed: Double = 1.5 // slow, relaxed tumbling while rolling
@@ -139,17 +140,21 @@ final class PetWindowController {
         behavior.tick()
         scene.cheerActive = (behavior.state == .cheer)
 
-        switch behavior.state {
-        case .walk:
-            advanceWalk(speed: walkSpeed)
-        case .run:
-            advanceWalk(speed: runSpeed)
-        case .roll:
-            advanceRoll()
-        case .follow:
-            advanceFollow()
-        default:
-            break
+        if let target = parkWalkTarget {
+            advanceParkWalk(to: target)
+        } else {
+            switch behavior.state {
+            case .walk:
+                advanceWalk(speed: walkSpeed)
+            case .run:
+                advanceWalk(speed: runSpeed)
+            case .roll:
+                advanceRoll()
+            case .follow:
+                advanceFollow()
+            default:
+                break
+            }
         }
 
         // Apply vertical jumping offset on screen coordinates (cheer reuses the jump bounce)
@@ -223,6 +228,48 @@ final class PetWindowController {
         facing = rollDir > 0 ? .right : .left
         scene.setFacing(facing)
         window.setFrameOrigin(NSPoint(x: x, y: curY))
+    }
+
+    // MARK: - Parking (Idle / Poke)
+
+    /// "Idle (Park)": stroll the cat to the bottom-left corner of the primary
+    /// screen, then freeze it there. The state machine is parked, so the cat
+    /// does not wander, follow, or fall asleep.
+    func park() {
+        guard let screen = NSScreen.main else { return }
+        parkWalkTarget = (x: screen.frame.minX + 12, y: screen.frame.minY)
+        behavior.setParked(true)
+        walkTarget = nil
+        let walkFrames = PixelPetGenerator.frames(for: .walk)
+        scene.play(animation: .walk, frames: walkFrames)
+    }
+
+    /// "Poke": clear the parked state so the cat starts moving normally again.
+    func unpark() {
+        parkWalkTarget = nil
+        behavior.setParked(false)
+    }
+
+    /// Steers the cat diagonally toward the park corner. The machine is frozen
+    /// while parked, so this stroll is app-driven (mirrors the web preview).
+    private func advanceParkWalk(to target: (x: Double, y: Double)) {
+        let curX = Double(window.frame.origin.x)
+        let curY = Double(window.frame.origin.y)
+        let dx = target.x - curX
+        let dy = target.y - curY
+        let len = (dx * dx + dy * dy).squareRoot()
+        if len > 0 {
+            let s = min(walkSpeed, len)
+            window.setFrameOrigin(NSPoint(x: curX + dx / len * s,
+                                          y: curY + dy / len * s))
+            facing = dx >= 0 ? .right : .left
+            scene.setFacing(facing)
+        }
+        if len < walkSpeed * 1.5 {
+            parkWalkTarget = nil // arrived: park in place
+            let idleFrames = PixelPetGenerator.frames(for: .idle)
+            scene.play(animation: .idle, frames: idleFrames)
+        }
     }
 
     // MARK: - Following the cursor

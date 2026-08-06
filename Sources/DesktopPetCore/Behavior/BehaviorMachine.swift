@@ -36,6 +36,7 @@ public final class BehaviorMachine {
 
     private var cursorInRange = false
     private var dragging = false
+    private var parked = false
 
     public init(clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
                 rollChance: @escaping () -> Double = { Double.random(in: 0...1) },
@@ -55,6 +56,7 @@ public final class BehaviorMachine {
 
     /// Cursor proximity update from the app layer (`true` = within follow range).
     public func setCursor(inRange: Bool) {
+        guard !parked else { return } // parked: don't chase the cursor
         cursorInRange = inRange
         if inRange, state == .idle || state == .walk || state == .run {
             enter(.follow)
@@ -92,10 +94,32 @@ public final class BehaviorMachine {
         if state == .walk || state == .run { enter(.idle) }
     }
 
+    /// Parked mode: the cat stays put (idle, no walking/running/following/sleeping).
+    /// Used by the menu's "Idle (Park)" item; "Poke" turns it back off.
+    public func setParked(_ value: Bool) {
+        guard parked != value else { return }
+        parked = value
+        if value {
+            enter(.idle)
+        } else {
+            nextDecisionTime = 0 // resume: decide on the very next tick
+        }
+    }
+
+    /// Manually trigger a state from the menu (mirrors the web control panel).
+    public func triggerActivity(_ state: PetState) {
+        if state == .drink {
+            startWaterDrink()
+        } else {
+            enter(state)
+        }
+    }
+
     // MARK: - Frame tick
 
     public func tick() {
         let t = clock()
+        if parked { return } // parked: no activity decisions, no sleep, stays idle
 
         // Finite-duration states expire.
         switch state {

@@ -2,12 +2,18 @@ import Foundation
 import UserNotifications
 import DesktopPetCore
 
-/// Schedules hourly water-drinking reminders via system notifications and
-/// triggers the in-app drink animation on the behavior machine.
+/// Schedules water-drinking reminders every `intervalMinutes` (default 60)
+/// via system notifications and triggers the in-app drink animation on the
+/// behavior machine. Mirrors the web preview's configurable hydration interval.
 final class WaterReminderManager {
 
     private weak var behavior: BehaviorMachine?
     private var inAppTimer: Timer?
+    private var isEnabled = false
+
+    /// Minutes between hydration alerts. Setting this and calling `reconfigure()`
+    /// re-schedules both the notification and the in-app timer.
+    var intervalMinutes: Int = 60
 
     init(behavior: BehaviorMachine) {
         self.behavior = behavior
@@ -16,15 +22,25 @@ final class WaterReminderManager {
     // MARK: - Public API
 
     func enable() {
+        isEnabled = true
         requestPermissionThenSchedule()
         scheduleInAppTimer()
     }
 
     func disable() {
+        isEnabled = false
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: ["com.desktop-pet.water-reminder"])
         inAppTimer?.invalidate()
         inAppTimer = nil
+    }
+
+    /// Re-schedules everything at the current `intervalMinutes`. Called when the
+    /// user changes the interval from the menu while reminders are on.
+    func reconfigure() {
+        guard isEnabled else { return }
+        disable()
+        enable()
     }
 
     // MARK: - System notification
@@ -32,20 +48,21 @@ final class WaterReminderManager {
     private func requestPermissionThenSchedule() {
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
-            if granted { self.scheduleHourlyNotification() }
+            guard granted else { return }
+            DispatchQueue.main.async { self.scheduleNotification() }
         }
     }
 
-    private func scheduleHourlyNotification() {
+    private func scheduleNotification() {
         let content = UNMutableNotificationContent()
         content.title = "💧 Water Reminder"
         content.body = "Time for a glass of water! Stay hydrated 🐱"
         content.sound = .default
 
-        // Fire every hour on the minute.
-        var dateComponents = DateComponents()
-        dateComponents.minute = 0
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        // Repeat every N minutes. `repeats: true` requires >= 60s, so any
+        // minute value >= 1 is valid.
+        let interval = TimeInterval(max(1, intervalMinutes) * 60)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: true)
 
         let request = UNNotificationRequest(
             identifier: "com.desktop-pet.water-reminder",
@@ -60,12 +77,12 @@ final class WaterReminderManager {
 
     // MARK: - In-app sync
 
-    /// Fires a `Timer` that triggers the drink animation at the top of every
-    /// hour, regardless of notification permission.
+    /// Fires a repeating `Timer` that triggers the drink animation every
+    /// `intervalMinutes`, regardless of notification permission.
     private func scheduleInAppTimer() {
         inAppTimer?.invalidate()
-        let interval = timeUntilNextHour()
-        inAppTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
+        let interval = TimeInterval(max(1, intervalMinutes) * 60)
+        inAppTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
             self?.fireDrink()
         }
     }
@@ -74,16 +91,5 @@ final class WaterReminderManager {
         DispatchQueue.main.async { [weak self] in
             self?.behavior?.startWaterDrink()
         }
-        // Re-schedule for the next hour.
-        scheduleInAppTimer()
-    }
-
-    private func timeUntilNextHour() -> TimeInterval {
-        let now = Date()
-        guard let next = Calendar.current.nextDate(
-            after: now,
-            matching: DateComponents(minute: 0),
-            matchingPolicy: .nextTime) else { return 3600 }
-        return next.timeIntervalSince(now)
     }
 }
