@@ -1,0 +1,12 @@
+{
+  "name": "desktop-pet-windows",
+  "version": "1.0.0",
+  "description": "Windows port of Desktop Pet",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}

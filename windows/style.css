@@ -1,0 +1,121 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+  font-family: sans-serif;
+  -webkit-app-region: no-drag;
+}
+
+body.browser-mode {
+  background: linear-gradient(to bottom, #a8c0ff, #fbc7d4);
+}
+
+#petContainer {
+  position: absolute;
+  width: 128px;
+  height: 320px;
+  left: 0;
+  top: 0;
+  cursor: grab;
+}
+
+#petContainer:active {
+  cursor: grabbing;
+}
+
+canvas {
+  display: block;
+  width: 128px;
+  height: 320px;
+  background: transparent;
+}
+
+#speechBubble {
+  display: none;
+  position: absolute;
+  background: #fffff0;
+  color: #010101;
+  border: 3px solid #010101;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  font-size: 12px;
+  width: 160px;
+  box-shadow: 4px 4px 0px #010101;
+  z-index: 1000;
+  text-align: center;
+  white-space: normal;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  left: 50%;
+  top: 180px; /* just above the cat, which sits at the bottom of the 320px window */
+}
+
+#speechBubble::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 15px 10px 0;
+  border-style: solid;
+  border-color: #fffff0 transparent transparent;
+  display: block;
+  width: 0;
+}
+
+#speechBubble::before {
+  content: '';
+  position: absolute;
+  bottom: -19px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 17px 12px 0;
+  border-style: solid;
+  border-color: #010101 transparent transparent;
+  display: block;
+  width: 0;
+  z-index: -1;
+}
+
+#controlPanel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #fffff0;
+  border: 3px solid #010101;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 4px 4px 0px #010101;
+  z-index: 99999;
+}
+
+#controlPanel button {
+  background: #eef1f6;
+  border: 2px solid #010101;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #010101;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+
+#controlPanel button:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #010101;
+}
+
+#controlPanel button:hover {
+  background: #dfebfd;
+}

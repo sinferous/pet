@@ -1,0 +1,22 @@
+name: build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: swift build -c release
+
+      - run: swift test
+
+      - run: bash scripts/build_app.sh
+
+      - run: bash scripts/make_dmg.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DesktopPet-dmg
+          path: dist/DesktopPet.dmg

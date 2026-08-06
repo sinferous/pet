@@ -1,0 +1,17 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+
+# Build output
+dist/
+*.dmg
+
+# Xcode (not used, but just in case)
+*.xcodeproj
+DerivedData/
+
+# Editor/OS noise
+Thumbs.db
