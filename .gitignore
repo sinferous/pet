@@ -15,3 +15,6 @@ DerivedData/
 
 # Editor/OS noise
 Thumbs.db
+
+# Browser-preview source (web-first workflow; not part of the Mac app)
+windows/
