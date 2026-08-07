@@ -31,7 +31,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testIdleWalksAfterDecisionDelay() {
-        let m = makeMachine(roll: 0.3) // 0.3 < 0.55 → walk
+        let m = makeMachine(roll: 0.05) // < 0.10 → walk
         advance(m, by: 5)
         XCTAssertEqual(m.state, .walk)
         m.completeWalk()
@@ -39,13 +39,13 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testIdleStaysIdleOnHighRoll() {
-        let m = makeMachine(roll: 0.999) // ≥ 0.995 → idle again
+        let m = makeMachine(roll: 0.98) // >= 0.94 → idle again
         advance(m, by: 5)
         XCTAssertEqual(m.state, .idle)
     }
 
     func testRandomlyRuns() {
-        let m = makeMachine(roll: 0.10) // < 0.20 → run
+        let m = makeMachine(roll: 0.15) // 0.10 <= roll < 0.18 → run
         advance(m, by: 5)
         XCTAssertEqual(m.state, .run)
         m.completeWalk()
@@ -53,7 +53,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testRunHasSafetyDeadline() {
-        let m = makeMachine(roll: 0.10)
+        let m = makeMachine(roll: 0.15)
         advance(m, by: 5)
         XCTAssertEqual(m.state, .run)
         advance(m, by: 16) // run deadline is 5...15s
@@ -61,7 +61,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testRandomlyRolls() {
-        let m = makeMachine(roll: 0.92) // 0.90...0.93 → roll
+        let m = makeMachine(roll: 0.45) // 0.42...0.49 → roll
         advance(m, by: 5)
         XCTAssertEqual(m.state, .roll)
         advance(m, by: 8) // roll deadline is 4...7s
@@ -69,7 +69,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testRandomlyPlaysWithWoolBall() {
-        let m = makeMachine(roll: 0.95) // 0.93...0.96 → woolball
+        let m = makeMachine(roll: 0.52) // 0.49...0.56 → woolball
         advance(m, by: 5)
         XCTAssertEqual(m.state, .woolball)
         advance(m, by: 9) // woolball deadline is 5...8s
@@ -77,7 +77,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testRandomlyCheers() {
-        let m = makeMachine(roll: 0.97) // 0.96...0.98 → cheer
+        let m = makeMachine(roll: 0.60) // 0.56...0.63 → cheer
         advance(m, by: 5)
         XCTAssertEqual(m.state, .cheer)
         advance(m, by: 6) // cheer deadline is 3...5s
@@ -85,7 +85,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testRandomlyLoves() {
-        let m = makeMachine(roll: 0.99) // 0.98...0.995 → love
+        let m = makeMachine(roll: 0.65) // 0.63...0.70 → love
         advance(m, by: 5)
         XCTAssertEqual(m.state, .love)
         advance(m, by: 7) // love deadline is 4...6s
@@ -93,7 +93,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testParkedForcesIdleAndSuppressesMovement() {
-        let m = makeMachine(roll: 0.10) // would run
+        let m = makeMachine(roll: 0.15) // would run
         m.setParked(true)
         XCTAssertEqual(m.state, .idle)
         advance(m, by: 10)
@@ -104,7 +104,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testParkingForcesIdleFromWalk() {
-        let m = makeMachine(roll: 0.3)
+        let m = makeMachine(roll: 0.05)
         advance(m, by: 5) // walk
         XCTAssertEqual(m.state, .walk)
         m.setParked(true)
@@ -112,7 +112,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testParkedSuppressesFollow() {
-        let m = makeMachine(roll: 0.5)
+        let m = makeMachine(roll: 0.10) // roll < 0.30 allows follow
         m.setParked(true)
         m.setCursor(inRange: true)
         XCTAssertEqual(m.state, .idle) // no follow while parked
@@ -150,7 +150,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testCursorProximityStartsAndStopsFollow() {
-        let m = makeMachine(roll: 0.5)
+        let m = makeMachine(roll: 0.10) // roll < 0.30 allows follow
         m.setCursor(inRange: true)
         XCTAssertEqual(m.state, .follow)
         m.setCursor(inRange: false)
@@ -158,7 +158,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testFollowTimesOut() {
-        let m = makeMachine(roll: 0.5)
+        let m = makeMachine(roll: 0.10) // roll < 0.30 allows follow
         m.setCursor(inRange: true)
         XCTAssertEqual(m.state, .follow)
         advance(m, by: 11) // follow lasts 10s
@@ -174,7 +174,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testPlayWindsDownToIdle() {
-        let m = makeMachine(roll: 0.6) // 0.55...0.75 → play
+        let m = makeMachine(roll: 0.20) // 0.18...0.26 → play
         advance(m, by: 5)
         XCTAssertEqual(m.state, .play)
         advance(m, by: 5) // next decision forces play → idle
@@ -182,7 +182,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testWalkHasSafetyDeadline() {
-        let m = makeMachine(roll: 0.3)
+        let m = makeMachine(roll: 0.05)
         advance(m, by: 5)
         XCTAssertEqual(m.state, .walk)
         advance(m, by: 30) // walk deadline is 10...25s
@@ -190,7 +190,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testDragOverridesStateAndEndsIdle() {
-        let m = makeMachine(roll: 0.3)
+        let m = makeMachine(roll: 0.05)
         m.handleDragStart()
         XCTAssertEqual(m.state, .react)
         m.handleDragEnd()
@@ -198,7 +198,7 @@ final class BehaviorMachineTests: XCTestCase {
     }
 
     func testStateChangeNotifications() {
-        let m = makeMachine(roll: 0.3)
+        let m = makeMachine(roll: 0.05)
         var observed: [PetState] = []
         m.onStateChange = { observed.append($0) }
         advance(m, by: 5) // → walk
