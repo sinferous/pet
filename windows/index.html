@@ -1195,6 +1195,9 @@ window.applyWaterInterval = () => {
   input.value = String(minutes);
   localStorage.setItem('waterIntervalMinutes', String(minutes));
   scheduleWaterReminder();
+  if (isElectron) {
+    ipcRenderer.send('update-settings', { waterIntervalMinutes: minutes });
+  }
 };
 
 // Pre-fill the input with the stored interval and start the timer.
@@ -1259,6 +1262,68 @@ function parkPet() {
 function pokePet() {
   parkWalkTarget = null;
   behavior.setParked(false);  // resume: the cat starts moving normally again
+}
+
+// Electron IPC listeners for tray menus
+if (isElectron) {
+  // Load initial settings
+  ipcRenderer.invoke('get-settings').then((settings) => {
+    waterIntervalMinutes = settings.waterIntervalMinutes;
+    const input = document.getElementById('waterIntervalInput');
+    if (input) input.value = String(waterIntervalMinutes);
+    
+    if (!settings.waterReminders) {
+      if (waterTimer) clearInterval(waterTimer);
+      waterTimer = null;
+    } else {
+      scheduleWaterReminder();
+    }
+    
+    if (settings.isParked) {
+      parkPet();
+    }
+  });
+
+  // Handle menu actions from Tray
+  ipcRenderer.on('menu-action', (event, action, data) => {
+    if (action === 'idle-park') {
+      parkPet();
+    } else if (action === 'poke') {
+      pokePet();
+    } else if (action === 'say') {
+      showSayBubble();
+    } else if (action === 'trigger-state') {
+      triggerState(data);
+    }
+  });
+
+  // Handle toggle water reminders
+  ipcRenderer.on('toggle-water-reminders', (event, enabled) => {
+    if (enabled) {
+      scheduleWaterReminder();
+    } else {
+      if (waterTimer) clearInterval(waterTimer);
+      waterTimer = null;
+    }
+  });
+
+  // Handle prompting hydration interval from tray
+  ipcRenderer.on('prompt-hydration-interval', (event) => {
+    const input = document.getElementById('waterIntervalInput');
+    const currentVal = input ? input.value : String(waterIntervalMinutes);
+    const result = prompt("How many minutes between hydration alerts? (1-1440)", currentVal);
+    if (result !== null) {
+      const parsed = parseInt(result, 10);
+      if (!isNaN(parsed)) {
+        const minutes = Math.max(1, Math.min(1440, parsed));
+        waterIntervalMinutes = minutes;
+        if (input) input.value = String(minutes);
+        
+        ipcRenderer.send('update-settings', { waterIntervalMinutes: minutes });
+        scheduleWaterReminder();
+      }
+    }
+  });
 }
 
 // Start Application

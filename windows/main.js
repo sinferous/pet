@@ -1,10 +1,64 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Tray, Menu, powerSaveBlocker } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 // Disable hardware acceleration before ready to avoid visual glitches with transparency
 app.disableHardwareAcceleration();
 
 let mainWindow;
+let tray = null;
+
+// Settings persistence
+const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+let settings = {
+  sleepPrevention: true,
+  waterReminders: true,
+  waterIntervalMinutes: 60,
+  autoStart: false,
+  isParked: false
+};
+
+function loadSettings() {
+  try {
+    if (fs.existsSync(settingsPath)) {
+      const data = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+      settings = { ...settings, ...data };
+    }
+  } catch (e) {
+    console.error('Failed to load settings', e);
+  }
+}
+
+function saveSettings() {
+  try {
+    fs.writeFileSync(settingsPath, JSON.stringify(settings), 'utf8');
+  } catch (e) {
+    console.error('Failed to save settings', e);
+  }
+}
+
+// Power save blocker
+let sleepBlockerId = null;
+function applySleepPrevention() {
+  if (settings.sleepPrevention) {
+    if (sleepBlockerId === null) {
+      sleepBlockerId = powerSaveBlocker.start('prevent-display-sleep');
+    }
+  } else {
+    if (sleepBlockerId !== null) {
+      powerSaveBlocker.stop(sleepBlockerId);
+      sleepBlockerId = null;
+    }
+  }
+}
+
+// Auto-start login item
+function applyAutoStart() {
+  app.setLoginItemSettings({
+    openAtLogin: settings.autoStart,
+    path: app.getPath('exe')
+  });
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -69,8 +123,142 @@ function createWindow() {
   });
 }
 
+// Tray Menu creation & updating
+function createTray() {
+  const iconPath = path.join(__dirname, 'artwork/idle/0.svg');
+  tray = new Tray(iconPath);
+  tray.setToolTip('Desktop Pet');
+  updateTrayMenu();
+}
+
+function updateTrayMenu() {
+  if (!tray) return;
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Prevent Sleep',
+      type: 'checkbox',
+      checked: settings.sleepPrevention,
+      click: (item) => {
+        settings.sleepPrevention = item.checked;
+        saveSettings();
+        applySleepPrevention();
+      }
+    },
+    {
+      label: 'Water Reminders',
+      type: 'checkbox',
+      checked: settings.waterReminders,
+      click: (item) => {
+        settings.waterReminders = item.checked;
+        saveSettings();
+        sendToRenderer('toggle-water-reminders', item.checked);
+      }
+    },
+    {
+      label: `Hydration Interval… (${settings.waterIntervalMinutes} min)`,
+      click: () => {
+        sendToRenderer('prompt-hydration-interval');
+      }
+    },
+    {
+      label: 'Start at Login',
+      type: 'checkbox',
+      checked: settings.autoStart,
+      click: (item) => {
+        settings.autoStart = item.checked;
+        saveSettings();
+        applyAutoStart();
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Idle (Park)',
+      type: 'checkbox',
+      checked: settings.isParked,
+      click: (item) => {
+        settings.isParked = item.checked;
+        saveSettings();
+        sendToRenderer('menu-action', item.checked ? 'idle-park' : 'poke');
+        updateTrayMenu();
+      }
+    },
+    {
+      label: 'Poke',
+      click: () => {
+        settings.isParked = false;
+        saveSettings();
+        sendToRenderer('menu-action', 'poke');
+        updateTrayMenu();
+      }
+    },
+    {
+      label: 'Say',
+      click: () => {
+        sendToRenderer('menu-action', 'say');
+      }
+    },
+    {
+      label: 'Movements',
+      submenu: [
+        { label: 'Idle', click: () => triggerMovement('idle') },
+        { label: 'Walk', click: () => triggerMovement('walk') },
+        { label: 'Sleep', click: () => triggerMovement('sleep') },
+        { label: 'Play', click: () => triggerMovement('play') },
+        { label: 'React (Shy)', click: () => triggerMovement('react') },
+        { label: 'Drink (Water)', click: () => triggerMovement('drink') },
+        { label: 'Laugh (Tears)', click: () => triggerMovement('laugh') },
+        { label: 'Jump (Hops)', click: () => triggerMovement('jump') },
+        { label: 'Run', click: () => triggerMovement('run') },
+        { label: 'Roll', click: () => triggerMovement('roll') },
+        { label: 'Wool Ball', click: () => triggerMovement('woolball') },
+        { label: 'Cheer', click: () => triggerMovement('cheer') },
+        { label: 'Love', click: () => triggerMovement('love') }
+      ]
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit Desktop Pet',
+      click: () => {
+        app.quit();
+      }
+    }
+  ]);
+  tray.setContextMenu(contextMenu);
+}
+
+function triggerMovement(stateName) {
+  settings.isParked = false;
+  saveSettings();
+  sendToRenderer('menu-action', 'trigger-state', stateName);
+  updateTrayMenu();
+}
+
+function sendToRenderer(channel, ...args) {
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.send(channel, ...args);
+  }
+}
+
+// IPC Handlers for Settings synchronization
+ipcMain.handle('get-settings', () => {
+  return settings;
+});
+
+ipcMain.on('update-settings', (event, newSettings) => {
+  settings = { ...settings, ...newSettings };
+  saveSettings();
+  applySleepPrevention();
+  applyAutoStart();
+  updateTrayMenu();
+});
+
+// App Lifecycle
 app.whenReady().then(() => {
+  loadSettings();
+  applySleepPrevention();
+  applyAutoStart();
   createWindow();
+  createTray();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
