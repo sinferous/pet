@@ -42,3 +42,34 @@ jobs:
         with:
           files: dist/DesktopPet.dmg
           generate_release_notes: true
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: windows
+        run: npm install
+
+      - name: Build Electron App (.exe)
+        working-directory: windows
+        run: npm run dist
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DesktopPet-exe
+          path: windows/dist/*.exe
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: windows/dist/*.exe
+          generate_release_notes: true

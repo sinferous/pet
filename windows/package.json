@@ -1,0 +1,25 @@
+{
+  "name": "desktop-pet-windows",
+  "version": "1.0.0",
+  "description": "Windows port of Desktop Pet",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.desktop-pet.windows",
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}
