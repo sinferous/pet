@@ -23,6 +23,10 @@ body.browser-mode {
   cursor: grab;
 }
 
+body:not(.browser-mode) #petContainer {
+  left: 64px;
+}
+
 #petContainer:active {
   cursor: grabbing;
 }
@@ -45,11 +49,12 @@ canvas {
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
   font-size: 12px;
-  width: 160px;
+  width: 180px;
   box-shadow: 4px 4px 0px #010101;
   z-index: 1000;
   text-align: center;
   white-space: normal;
+  word-wrap: break-word;
   pointer-events: none;
   transform: translate(-50%, -100%);
   left: 50%;

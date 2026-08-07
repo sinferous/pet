@@ -616,7 +616,7 @@ function updateWindowBounds() {
   }
 
   if (isElectron) {
-    ipcRenderer.send('set-window-bounds', { x: windowX, y: windowY + yOffset });
+    ipcRenderer.send('set-window-bounds', { x: windowX - 64, y: windowY + yOffset });
   } else {
     container.style.left = `${windowX}px`;
     container.style.top = `${windowY + yOffset}px`;
