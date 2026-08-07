@@ -11,6 +11,7 @@ final class StatusItemController {
     private let waterReminder: WaterReminderManager
     private let behavior: BehaviorMachine
     private let parkHandler: (Bool) -> Void
+    private let sayHandler: () -> Void
 
     private var isParked = false
 
@@ -20,19 +21,22 @@ final class StatusItemController {
     private let autoStartItem = NSMenuItem()
     private let idleItem = NSMenuItem()
     private let pokeItem = NSMenuItem()
+    private let sayItem = NSMenuItem()
 
     init(settings: SettingsStore,
          sleepPreventer: SleepPreventer,
          autoStart: AutoStartManager,
          waterReminder: WaterReminderManager,
          behavior: BehaviorMachine,
-         parkHandler: @escaping (Bool) -> Void) {
+         parkHandler: @escaping (Bool) -> Void,
+         sayHandler: @escaping () -> Void) {
         self.settings = settings
         self.sleepPreventer = sleepPreventer
         self.autoStart = autoStart
         self.waterReminder = waterReminder
         self.behavior = behavior
         self.parkHandler = parkHandler
+        self.sayHandler = sayHandler
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
@@ -76,6 +80,11 @@ final class StatusItemController {
         pokeItem.target = self
         pokeItem.action = #selector(poke)
         menu.addItem(pokeItem)
+
+        sayItem.title = "Say"
+        sayItem.target = self
+        sayItem.action = #selector(triggerSay)
+        menu.addItem(sayItem)
 
         let movementsItem = NSMenuItem(title: "Movements", action: nil, keyEquivalent: "")
         movementsItem.submenu = buildMovementsMenu()
@@ -184,6 +193,10 @@ final class StatusItemController {
         isParked = false
         parkHandler(false)
         refreshCheckmarks()
+    }
+
+    @objc private func triggerSay() {
+        sayHandler()
     }
 
     @objc private func triggerMovement(_ sender: NSMenuItem) {

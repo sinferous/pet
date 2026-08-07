@@ -47,6 +47,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 } else {
                     petWindowController?.unpark()
                 }
+            },
+            sayHandler: { [weak petWindowController] in
+                petWindowController?.say()
             })
     }
 

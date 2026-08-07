@@ -214,6 +214,10 @@ final class PetScene: SKScene {
         showSpeechBubble(text: txt, duration: 3.0)
     }
 
+    func showSayBubble() {
+        showSpeechBubble(text: "sathya sathya sathya", duration: 4.0)
+    }
+
     // MARK: - Zzz overlay
 
     private func showZzz() {

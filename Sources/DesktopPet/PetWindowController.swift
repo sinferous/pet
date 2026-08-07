@@ -118,11 +118,20 @@ final class PetWindowController {
         self.meowTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
             guard let self else { return }
             if self.behavior.state == .idle || self.behavior.state == .walk {
-                if Double.random(in: 0...1) < 0.35 {
+                let roll = Double.random(in: 0...1)
+                if roll < 0.15 {
+                    // Random "say" trigger
+                    self.scene.showSayBubble()
+                } else if roll < 0.50 {
                     self.scene.showRandomMeowSpeechBubble()
                 }
             }
         }
+    }
+
+    /// Triggered from the menu "Say" item — shows "sathya sathya sathya" bubble.
+    func say() {
+        scene.showSayBubble()
     }
 
     deinit {

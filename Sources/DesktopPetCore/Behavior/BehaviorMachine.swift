@@ -40,8 +40,8 @@ public final class BehaviorMachine {
 
     public init(clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
                 rollChance: @escaping () -> Double = { Double.random(in: 0...1) },
-                idleDecisionDelay: @escaping () -> TimeInterval = { .random(in: 20...60) },
-                sleepAfterIdle: @escaping () -> TimeInterval = { .random(in: 90...150) }) {
+                idleDecisionDelay: @escaping () -> TimeInterval = { .random(in: 5...15) },
+                sleepAfterIdle: @escaping () -> TimeInterval = { .random(in: 30...60) }) {
         self.clock = clock
         self.rollChance = rollChance
         self.idleDecisionDelay = idleDecisionDelay
@@ -55,11 +55,15 @@ public final class BehaviorMachine {
     // MARK: - External events
 
     /// Cursor proximity update from the app layer (`true` = within follow range).
+    /// Only follows ~30% of the time for a more natural feel.
     public func setCursor(inRange: Bool) {
         guard !parked else { return } // parked: don't chase the cursor
         cursorInRange = inRange
         if inRange, state == .idle || state == .walk || state == .run {
-            enter(.follow)
+            // Only follow the cursor ~30% of the time
+            if rollChance() < 0.30 {
+                enter(.follow)
+            }
         } else if !inRange, state == .follow {
             enter(.idle)
         }
@@ -175,24 +179,33 @@ public final class BehaviorMachine {
             enter(.idle)
             return
         }
-        if roll < 0.20 {
-            enter(.run)
-        } else if roll < 0.55 {
+        // All 13 activities distributed more evenly
+        if roll < 0.10 {
             enter(.walk)
-        } else if roll < 0.70 {
+        } else if roll < 0.18 {
+            enter(.run)
+        } else if roll < 0.26 {
             enter(.play)
-        } else if roll < 0.80 {
+        } else if roll < 0.34 {
             enter(.laugh)
-        } else if roll < 0.90 {
+        } else if roll < 0.42 {
             enter(.jump)
-        } else if roll < 0.93 {
-            enter(.roll)       // tumble across the screen
-        } else if roll < 0.96 {
-            enter(.woolball)   // play with the wool ball
-        } else if roll < 0.98 {
-            enter(.cheer)      // jump + confetti
-        } else if roll < 0.995 {
-            enter(.love)       // heart eyes + heart emoji
+        } else if roll < 0.49 {
+            enter(.roll)
+        } else if roll < 0.56 {
+            enter(.woolball)
+        } else if roll < 0.63 {
+            enter(.cheer)
+        } else if roll < 0.70 {
+            enter(.love)
+        } else if roll < 0.76 {
+            enter(.sleep)
+        } else if roll < 0.82 {
+            enter(.react)
+        } else if roll < 0.87 {
+            enter(.drink)
+        } else if roll < 0.94 {
+            enter(.follow)
         } else {
             enter(.idle)
         }
@@ -207,7 +220,7 @@ public final class BehaviorMachine {
         case .drink:
             stateUntil = t + 6.0
         case .sleep:
-            stateUntil = t + .random(in: 20...40)
+            stateUntil = t + .random(in: 10...20)
         case .follow:
             stateUntil = t + 10.0
         case .play:
