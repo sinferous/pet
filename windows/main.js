@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, Tray, Menu, powerSaveBlocker } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Tray, Menu, powerSaveBlocker, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -14,7 +14,7 @@ let settings = {
   sleepPrevention: true,
   waterReminders: true,
   waterIntervalMinutes: 60,
-  autoStart: false,
+  autoStart: true,
   isParked: false
 };
 
@@ -62,7 +62,7 @@ function applyAutoStart() {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 128,
+    width: 256,
     height: 320,
     transparent: true,
     frame: false,
@@ -81,9 +81,9 @@ function createWindow() {
   // Align to bottom-center of the primary screen initially
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
-  const initialX = Math.round(primaryDisplay.bounds.x + (width - 128) / 2);
+  const initialX = Math.round(primaryDisplay.bounds.x + (width - 256) / 2);
   const initialY = Math.round(primaryDisplay.bounds.y + height - 320);
-  mainWindow.setBounds({ x: initialX, y: initialY, width: 128, height: 320 });
+  mainWindow.setBounds({ x: initialX, y: initialY, width: 256, height: 320 });
 
   // Handle transparent click-through
   ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
@@ -107,10 +107,23 @@ function createWindow() {
       mainWindow.setBounds({
         x: Math.round(bounds.x),
         y: Math.round(bounds.y),
-        width: 128,
+        width: 256,
         height: 320
       });
     }
+  });
+
+  ipcMain.on('show-context-menu', (event) => {
+    const contextMenu = Menu.buildFromTemplate(getMenuTemplate());
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+      contextMenu.popup({ window: win });
+    }
+  });
+
+  ipcMain.on('set-tray-icon', (event, dataUrl) => {
+    const img = nativeImage.createFromDataURL(dataUrl);
+    createTray(img);
   });
 
   ipcMain.handle('get-cursor-position', () => {
@@ -123,17 +136,8 @@ function createWindow() {
   });
 }
 
-// Tray Menu creation & updating
-function createTray() {
-  const iconPath = path.join(__dirname, 'artwork/idle/0.svg');
-  tray = new Tray(iconPath);
-  tray.setToolTip('Desktop Pet');
-  updateTrayMenu();
-}
-
-function updateTrayMenu() {
-  if (!tray) return;
-  const contextMenu = Menu.buildFromTemplate([
+function getMenuTemplate() {
+  return [
     {
       label: 'Prevent Sleep',
       type: 'checkbox',
@@ -222,7 +226,26 @@ function updateTrayMenu() {
         app.quit();
       }
     }
-  ]);
+  ];
+}
+
+// Tray Menu creation & updating
+function createTray(iconImage) {
+  if (tray) {
+    if (iconImage) {
+      tray.setImage(iconImage);
+    }
+    return;
+  }
+  const icon = iconImage || nativeImage.createEmpty();
+  tray = new Tray(icon);
+  tray.setToolTip('Desktop Pet');
+  updateTrayMenu();
+}
+
+function updateTrayMenu() {
+  if (!tray) return;
+  const contextMenu = Menu.buildFromTemplate(getMenuTemplate());
   tray.setContextMenu(contextMenu);
 }
 

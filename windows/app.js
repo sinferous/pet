@@ -55,7 +55,22 @@ function preloadImages(callback) {
           callback();
         }
       };
-      img.onload = onLoadOrError;
+      img.onload = () => {
+        if (anim === 'idle' && i === 0 && isElectron) {
+          try {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 32;
+            tempCanvas.height = 32;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(img, 0, 0, 32, 32);
+            const dataUrl = tempCanvas.toDataURL('image/png');
+            ipcRenderer.send('set-tray-icon', dataUrl);
+          } catch (e) {
+            console.error('Failed to create tray icon from SVG', e);
+          }
+        }
+        onLoadOrError();
+      };
       img.onerror = (err) => {
         console.error(`Failed to load image: artwork/${anim}/${i}.svg`, err);
         // Show loading error on the window console/screen if applicable
@@ -139,7 +154,7 @@ function updateWindowBounds() {
   }
 
   if (isElectron) {
-    ipcRenderer.send('set-window-bounds', { x: windowX, y: windowY + yOffset });
+    ipcRenderer.send('set-window-bounds', { x: windowX - 64, y: windowY + yOffset });
   } else {
     container.style.left = `${windowX}px`;
     container.style.top = `${windowY + yOffset}px`;
@@ -204,7 +219,6 @@ container.addEventListener('mousedown', async (e) => {
     const pixel = ctx.getImageData(x, y, 1, 1).data;
     alpha = pixel[3];
   } catch (err) {
-    // Tainted canvas security block in standard Chrome under file:// protocol
     // Bounding box fallback: ignore click if it's on outer transparent borders
     if (x < 15 || x > 113 || y < 15 || y > 115) {
       alpha = 0;
@@ -216,6 +230,14 @@ container.addEventListener('mousedown', async (e) => {
   if (alpha < 8) {
     wasPressedOnCat = false;
     return; // ignore transparent clicks
+  }
+
+  if (e.button === 2) {
+    wasPressedOnCat = false;
+    if (isElectron) {
+      ipcRenderer.send('show-context-menu');
+    }
+    return;
   }
 
   wasPressedOnCat = true;
@@ -275,6 +297,10 @@ window.addEventListener('mouseup', () => {
     // Keep the current height instead of snapping to floor
     updateWindowBounds();
   }
+});
+
+window.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
 });
 
 // Hit-testing transparency (only relevant in Electron)

@@ -524,7 +524,22 @@ function preloadImages(callback) {
           callback();
         }
       };
-      img.onload = onLoadOrError;
+      img.onload = () => {
+        if (anim === 'idle' && i === 0 && isElectron) {
+          try {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 32;
+            tempCanvas.height = 32;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(img, 0, 0, 32, 32);
+            const dataUrl = tempCanvas.toDataURL('image/png');
+            ipcRenderer.send('set-tray-icon', dataUrl);
+          } catch (e) {
+            console.error('Failed to create tray icon from SVG', e);
+          }
+        }
+        onLoadOrError();
+      };
       img.onerror = (err) => {
         console.error(`Failed to load image: artwork/${anim}/${i}.svg`, err);
         // Show loading error on the window console/screen if applicable
@@ -885,6 +900,14 @@ container.addEventListener('mousedown', async (e) => {
     return; // ignore transparent clicks
   }
 
+  if (e.button === 2) {
+    wasPressedOnCat = false;
+    if (isElectron) {
+      ipcRenderer.send('show-context-menu');
+    }
+    return;
+  }
+
   wasPressedOnCat = true;
   isDragging = true;
   behavior.handleDragStart();
@@ -943,6 +966,10 @@ window.addEventListener('mouseup', () => {
     // Keep the current height instead of snapping to floor
     updateWindowBounds();
   }
+});
+
+window.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
 });
 
 // Hit-testing transparency (only relevant in Electron)
