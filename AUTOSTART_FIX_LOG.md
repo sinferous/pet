@@ -72,3 +72,15 @@ When sharing this application with your friends, please advise them to use the *
 2. They should run the setup to install Luna in a permanent, stable user directory.
 3. Right-click the cat on their screen, select **Start at Login** to enable autostart.
 4. When they reboot their PC, the companion will start automatically without manual launch.
+
+---
+
+## 🤖 Git Integration & Automated Builds
+
+To make deployment and testing simple:
+1. **Pushed to Git**: All fixes have been staged, committed, and pushed directly to the `main` branch on GitHub (`https://github.com/sinferous/pet.git`).
+2. **GitHub Actions Workflow**: The push automatically triggers the CI/CD pipeline configured in [.github/workflows/main.yml](file:///j:/Work/Webtree%20Online/Desktop%20pet/.github/workflows/main.yml).
+3. **Automated Artifact Generation**:
+   - The workflow compiles the macOS version and packages it as **`Luna.dmg`**.
+   - The workflow compiles the Windows version and packages it as **`Luna Setup 1.0.0.exe`** and **`Luna 1.0.0.exe`**.
+   - Your friends can download the fresh builds directly from the GitHub Actions run artifacts or the Releases page.
