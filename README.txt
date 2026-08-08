@@ -50,6 +50,16 @@ with custom, silence-friendly water reminders.
   - Select "Quit" to exit.
 
 
+💡 PRO-TIP: CONTROLLING AN ANNOYING CAT
+------------------------------------------------------------------------
+If the cat starts walking around too much or gets in your way, you can
+freeze it:
+* Select "Stay" (or "Idle (Park)") from the menu. The cat will walk to
+  the corner of the screen and sit down quietly.
+* To get it moving again, choose the "Poke" option from the menu, and
+  it will get back up and resume normal movement.
+
+
 🛠️ HOW TO BUILD FROM SOURCE
 
 Windows Version:
