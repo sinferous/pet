@@ -307,6 +307,14 @@ window.addEventListener('contextmenu', (e) => {
 function handleMouseMove(e) {
   if (isDragging || !isElectron) return;
 
+  const closeEl = document.getElementById('speechBubbleClose');
+  const isOverCloseBtn = e.target === closeEl || (e.target && e.target.closest('#speechBubbleClose'));
+
+  if (isOverCloseBtn) {
+    ipcRenderer.send('set-ignore-mouse-events', false, { forward: true });
+    return;
+  }
+
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
