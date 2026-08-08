@@ -61,6 +61,26 @@ canvas {
   top: 180px; /* just above the cat, which sits at the bottom of the 320px window */
 }
 
+#speechBubbleClose {
+  display: none;
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1;
+  color: #888888;
+  user-select: none;
+  pointer-events: auto; /* allow clicks on this button despite parent being pointer-events: none */
+  transition: color 0.1s;
+}
+
+#speechBubbleClose:hover {
+  color: #ff4d4d;
+}
+
 #speechBubble::after {
   content: '';
   position: absolute;

@@ -143,7 +143,6 @@ class BehaviorMachine {
     // Expire finite-duration states
     switch (this.state) {
       case PetState.react:
-      case PetState.drink:
       case PetState.sleep:
       case PetState.follow:
       case PetState.laugh:

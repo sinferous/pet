@@ -35,7 +35,10 @@
 <body>
   <div id="error-banner"></div>
   <div id="petContainer">
-    <div id="speechBubble">💧 Stay hydrated, human!</div>
+    <div id="speechBubble">
+      <span id="speechBubbleClose" onclick="closeSpeechBubble(event)">&times;</span>
+      <span id="speechBubbleText">💧 Stay hydrated, human!</span>
+    </div>
     <canvas id="petCanvas" width="128" height="320"></canvas>
   </div>
 
@@ -210,7 +213,6 @@ class BehaviorMachine {
     // Expire finite-duration states
     switch (this.state) {
       case PetState.react:
-      case PetState.drink:
       case PetState.sleep:
       case PetState.follow:
       case PetState.laugh:
@@ -1020,33 +1022,53 @@ const catVoices = [
 ];
 
 let speechTimeout = null;
-function showSpeechBubble(text, duration = 3000) {
-  const bubble = document.getElementById('speechBubble');
-  if (!bubble) return;
+let isWaterReminderActive = false;
 
-  bubble.textContent = text;
+function showSpeechBubble(text, isWaterReminder = false) {
+  const bubble = document.getElementById('speechBubble');
+  const textEl = document.getElementById('speechBubbleText');
+  const closeEl = document.getElementById('speechBubbleClose');
+  if (!bubble || !textEl) return;
+
+  textEl.textContent = text;
   bubble.style.display = 'block';
+  isWaterReminderActive = isWaterReminder;
+
+  if (closeEl) {
+    closeEl.style.display = isWaterReminder ? 'block' : 'none';
+  }
 
   if (speechTimeout) {
     clearTimeout(speechTimeout);
+    speechTimeout = null;
   }
-  speechTimeout = setTimeout(() => {
-    bubble.style.display = 'none';
-  }, duration);
+
+  if (!isWaterReminder) {
+    speechTimeout = setTimeout(() => {
+      bubble.style.display = 'none';
+    }, 3000);
+  }
 }
 
 function triggerWaterReminderBubble() {
   const idx = Math.floor(Math.random() * waterSentences.length);
-  showSpeechBubble(waterSentences[idx], 6000);
+  showSpeechBubble(waterSentences[idx], true);
 }
 
-function triggerRandomMeow() {
-  // Only meow if not currently showing a bubble
+window.closeSpeechBubble = (event) => {
+  if (event) event.stopPropagation(); // prevent drag trigger
   const bubble = document.getElementById('speechBubble');
-  if (bubble && bubble.style.display === 'block') return;
+  if (bubble) {
+    bubble.style.display = 'none';
+  }
+  if (isWaterReminderActive) {
+    isWaterReminderActive = false;
+    behavior.enter(PetState.idle); // resume normal behavior
+  }
+};
 
-  const idx = Math.floor(Math.random() * catVoices.length);
-  showSpeechBubble(catVoices[idx], 2500);
+function triggerRandomMeow() {
+  // Disabled as per user request
 }
 
 function showSayBubble() {
@@ -1085,10 +1107,7 @@ behavior.onStateChange = (state) => {
   } else if (state === PetState.drink) {
     triggerWaterReminderBubble();
   } else if (state === PetState.react) {
-    // Purr when clicked/petted
-    const reacts = ["Purrrrr...", "Prrrr! ❤️", "Mrrrp! ♪", "Meow~", "Purrrrrr..."];
-    const idx = Math.floor(Math.random() * reacts.length);
-    showSpeechBubble(reacts[idx], 3000);
+    // React state plays animation but has no voice bubbles as requested
   }
 };
 
@@ -1106,7 +1125,20 @@ function loop(now) {
 
   behavior.tick();
 
-  if (parkWalkTarget) {
+  if (hydrationWalkTarget) {
+    // Running to center (app-driven; the machine is frozen).
+    const step = ScreenNavigator.step(windowX, windowY, hydrationWalkTarget.x, hydrationWalkTarget.y, runSpeed, screens, petWidth, winHeight, headroom);
+    facing = step.facing;
+    windowX = step.x;
+    windowY = step.y;
+    updateWindowBounds();
+    currentAnim = 'run';
+    if (Math.hypot(windowX - hydrationWalkTarget.x, windowY - hydrationWalkTarget.y) < runSpeed * 1.5) {
+      hydrationWalkTarget = null;   // arrived
+      behavior.setParked(false);   // unfreeze
+      behavior.enter(PetState.drink); // play drink animation & show persistent bubble
+    }
+  } else if (parkWalkTarget) {
     // Strolling to the park corner (app-driven; the machine is frozen).
     const step = ScreenNavigator.step(windowX, windowY, parkWalkTarget.x, parkWalkTarget.y, walkSpeed, screens, petWidth, winHeight, headroom);
     facing = step.facing;
@@ -1200,6 +1232,19 @@ function loop(now) {
 // and persisted to localStorage; the timer reschedules when it changes.
 let waterIntervalMinutes = parseInt(localStorage.getItem('waterIntervalMinutes') || '60', 10);
 let waterTimer = null;
+let hydrationWalkTarget = null;
+
+function triggerWaterHydrationFlow() {
+  if (screens.length === 0) return;
+  const s = screens[0];
+  const targetX = s.minX + (s.width - petWidth) / 2;
+  const targetY = s.maxY - winHeight;
+  hydrationWalkTarget = { x: targetX, y: targetY };
+  currentAnim = 'run';
+  currentFrameIndex = 0;
+  animTime = 0;
+  behavior.setParked(true);
+}
 
 function scheduleWaterReminder() {
   if (waterTimer) clearInterval(waterTimer);
@@ -1211,7 +1256,7 @@ function scheduleWaterReminder() {
         body: 'Time to drink some water! 💧'
       });
     }
-    behavior.startWaterDrink();
+    triggerWaterHydrationFlow();
   }, ms);
 }
 
@@ -1232,17 +1277,7 @@ const waterIntervalInput = document.getElementById('waterIntervalInput');
 if (waterIntervalInput) waterIntervalInput.value = String(waterIntervalMinutes);
 scheduleWaterReminder();
 
-// Random background meows/purrs check (every 10 seconds, 35% chance when walking or idling)
-setInterval(() => {
-  if (behavior.state === PetState.idle || behavior.state === PetState.walk) {
-    const roll = Math.random();
-    if (roll < 0.15) {
-      showSayBubble();
-    } else if (roll < 0.50) {
-      triggerRandomMeow();
-    }
-  }
-}, 10000);
+// Random background meows/purrs check (disabled as per instructions)
 
 // Request notification permission in browser mode
 if (!isElectron && typeof Notification !== 'undefined' && Notification.requestPermission) {
@@ -1255,19 +1290,14 @@ if (!isElectron && typeof Notification !== 'undefined' && Notification.requestPe
 window.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 'w') {
     console.log('Mocking water reminder...');
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('Desktop Pet', {
-        body: 'Time to drink some water! 💧'
-      });
-    }
-    behavior.startWaterDrink();
+    triggerWaterHydrationFlow();
   }
 });
 
 window.triggerState = (stateName) => {
   console.log(`Manually triggering state: ${stateName}`);
   if (stateName === 'drink') {
-    behavior.startWaterDrink();
+    triggerWaterHydrationFlow();
   } else {
     behavior.enter(stateName);
   }
