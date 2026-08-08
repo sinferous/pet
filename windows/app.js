@@ -134,11 +134,11 @@ async function initScreens() {
     });
   }
 
-  // Set initial position: bottom-center of primary screen
+  // Set initial position: center of primary screen
   if (screens.length > 0) {
     const s = screens[0];
     windowX = s.minX + (s.width - petWidth) / 2;
-    windowY = s.maxY - petHeight;
+    windowY = s.minY + (s.height - petHeight) / 2;
     updateWindowBounds();
   }
 }

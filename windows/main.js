@@ -78,11 +78,11 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Align to bottom-center of the primary screen initially
+  // Align to center of the primary screen initially
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
   const initialX = Math.round(primaryDisplay.bounds.x + (width - 256) / 2);
-  const initialY = Math.round(primaryDisplay.bounds.y + height - 320);
+  const initialY = Math.round(primaryDisplay.bounds.y + (height - 320) / 2 - 100);
   mainWindow.setBounds({ x: initialX, y: initialY, width: 256, height: 320 });
 
   // Handle transparent click-through
