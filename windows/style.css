@@ -75,9 +75,10 @@ canvas {
   cursor: pointer;
   font-family: Arial, sans-serif;
   font-weight: bold;
-  font-size: 13px;
-  line-height: 15px; /* offset slightly to center the symbol */
-  text-align: center;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   user-select: none;
   pointer-events: auto; /* allow clicks on this button despite parent being pointer-events: none */
   box-shadow: 2px 2px 0px #010101;

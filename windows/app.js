@@ -364,7 +364,7 @@ function showSpeechBubble(text, isWaterReminder = false) {
   isWaterReminderActive = isWaterReminder;
 
   if (closeEl) {
-    closeEl.style.display = isWaterReminder ? 'block' : 'none';
+    closeEl.style.display = isWaterReminder ? 'flex' : 'none';
   }
 
   if (speechTimeout) {

@@ -1035,7 +1035,7 @@ function showSpeechBubble(text, isWaterReminder = false) {
   isWaterReminderActive = isWaterReminder;
 
   if (closeEl) {
-    closeEl.style.display = isWaterReminder ? 'block' : 'none';
+    closeEl.style.display = isWaterReminder ? 'flex' : 'none';
   }
 
   if (speechTimeout) {
@@ -1238,7 +1238,8 @@ function triggerWaterHydrationFlow() {
   if (screens.length === 0) return;
   const s = screens[0];
   const targetX = s.minX + (s.width - petWidth) / 2;
-  const targetY = s.minY + (s.height - winHeight) / 2;
+  // Center the cat itself vertically (since the cat is drawn 200px from the top of the 320px window, shift window up by 100px to center it)
+  const targetY = s.minY + (s.height - winHeight) / 2 - 100;
   hydrationWalkTarget = { x: targetX, y: targetY };
   currentAnim = 'run';
   currentFrameIndex = 0;
