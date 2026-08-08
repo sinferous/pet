@@ -400,7 +400,7 @@ window.closeSpeechBubble = (event) => {
   }
   if (isWaterReminderActive) {
     isWaterReminderActive = false;
-    behavior.enter(PetState.idle); // resume normal behavior
+    behavior.enter(PetState.run); // run somewhere else immediately!
   }
 };
 
@@ -563,6 +563,14 @@ window.triggerState = (stateName) => {
     behavior.enter(stateName);
   }
 };
+
+// Force the cat to walk/run to a random position every 1 minute
+setInterval(() => {
+  // Ignore if busy, dragging, settings dialog open, or showing a water reminder
+  if (hydrationWalkTarget || isPromptDialogOpen || isDragging || isWaterReminderActive) return;
+  const state = Math.random() < 0.5 ? PetState.walk : PetState.run;
+  behavior.enter(state);
+}, 60000);
 
 // Start Application
 preloadImages(() => {
