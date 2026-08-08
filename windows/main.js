@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, Tray, Menu, powerSaveBlocker, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Tray, Menu, powerSaveBlocker, nativeImage, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -292,6 +292,27 @@ ipcMain.on('update-settings', (event, newSettings) => {
   updateTrayMenu();
 });
 
+// Helper to warn user if running from temporary directories
+function checkRunningFromTemp() {
+  if (!app.isPackaged) return; // ignore in development mode
+  
+  const startupPath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
+  const tempPath = app.getPath('temp');
+  
+  if (
+    startupPath.toLowerCase().includes(tempPath.toLowerCase()) || 
+    startupPath.toLowerCase().includes('appdata\\local\\temp')
+  ) {
+    dialog.showMessageBox({
+      type: 'warning',
+      title: 'Luna - Temporary Location Warning',
+      message: 'Running from a Temporary Folder',
+      detail: 'Luna is currently running from a temporary location (this usually happens if you open it directly from a ZIP file).\n\nThe "Start at Login" feature will NOT work after a restart because temporary files are deleted by Windows.\n\nTo resolve this:\n1. Copy/move the application file to a permanent folder (like your Desktop, Documents, or local programs folder).\n2. Run the application from that permanent location.',
+      buttons: ['OK']
+    });
+  }
+}
+
 // App Lifecycle
 app.whenReady().then(() => {
   loadSettings();
@@ -299,6 +320,7 @@ app.whenReady().then(() => {
   applyAutoStart();
   createWindow();
   createTray();
+  checkRunningFromTemp();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

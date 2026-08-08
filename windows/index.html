@@ -1388,24 +1388,6 @@ window.cancelPromptDialog = () => {
 };
 
 if (isElectron) {
-  // Load initial settings
-  ipcRenderer.invoke('get-settings').then((settings) => {
-    waterIntervalMinutes = settings.waterIntervalMinutes;
-    const input = document.getElementById('waterIntervalInput');
-    if (input) input.value = String(waterIntervalMinutes);
-    
-    if (!settings.waterReminders) {
-      if (waterTimer) clearInterval(waterTimer);
-      waterTimer = null;
-    } else {
-      scheduleWaterReminder();
-    }
-    
-    if (settings.isParked) {
-      parkPet();
-    }
-  });
-
   // Handle menu actions from Tray
   ipcRenderer.on('menu-action', (event, action, data) => {
     if (action === 'idle-park') {
@@ -1463,6 +1445,24 @@ preloadImages(() => {
     if (isElectron) {
       const cp = document.getElementById('controlPanel');
       if (cp) cp.style.display = 'none';
+
+      // Load initial settings after screens are initialized
+      ipcRenderer.invoke('get-settings').then((settings) => {
+        waterIntervalMinutes = settings.waterIntervalMinutes;
+        const input = document.getElementById('waterIntervalInput');
+        if (input) input.value = String(waterIntervalMinutes);
+        
+        if (!settings.waterReminders) {
+          if (waterTimer) clearInterval(waterTimer);
+          waterTimer = null;
+        } else {
+          scheduleWaterReminder();
+        }
+        
+        if (settings.isParked) {
+          parkPet();
+        }
+      });
     }
     requestAnimationFrame(loop);
   });
