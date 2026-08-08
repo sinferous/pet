@@ -74,3 +74,9 @@ macOS Version:
 * Run `swift test` to run test suites.
 * Run `swift build -c release` and run `bash scripts/build_app.sh`
   to package the App Bundle.
+
+
+📫 FEEDBACK & SUPPORT
+------------------------------------------------------------------------
+If you find any bugs, have feedback, or want to suggest new features,
+please report them directly to the developer at: sinferous32@gmail.com

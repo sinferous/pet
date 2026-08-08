@@ -118,3 +118,10 @@ npm run package
 
 ## 📄 License
 MIT License. Created by **sinferous**.
+
+---
+
+## 📫 Feedback & Support
+
+If you find any bugs, have feedback, or want to suggest new features, please report them directly to the developer at: **sinferous32@gmail.com**
+
