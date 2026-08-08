@@ -514,7 +514,7 @@ function triggerWaterHydrationFlow() {
   if (screens.length === 0) return;
   const s = screens[0];
   const targetX = s.minX + (s.width - petWidth) / 2;
-  const targetY = s.maxY - petHeight;
+  const targetY = s.minY + (s.height - petHeight) / 2;
   hydrationWalkTarget = { x: targetX, y: targetY };
   currentAnim = 'run';
   currentFrameIndex = 0;

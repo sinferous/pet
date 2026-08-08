@@ -64,21 +64,33 @@ canvas {
 #speechBubbleClose {
   display: none;
   position: absolute;
-  top: 2px;
-  right: 6px;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #ff4d4d;
+  border: 3px solid #010101;
+  color: #ffffff;
   cursor: pointer;
   font-family: Arial, sans-serif;
   font-weight: bold;
-  font-size: 14px;
-  line-height: 1;
-  color: #888888;
+  font-size: 13px;
+  line-height: 15px; /* offset slightly to center the symbol */
+  text-align: center;
   user-select: none;
   pointer-events: auto; /* allow clicks on this button despite parent being pointer-events: none */
-  transition: color 0.1s;
+  box-shadow: 2px 2px 0px #010101;
+  transition: background-color 0.1s, transform 0.05s;
 }
 
 #speechBubbleClose:hover {
-  color: #ff4d4d;
+  background-color: #ff1a1a;
+  transform: scale(1.1);
+}
+
+#speechBubbleClose:active {
+  transform: translate(1px, 1px);
 }
 
 #speechBubble::after {
