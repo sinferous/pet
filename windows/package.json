@@ -17,8 +17,7 @@
     "appId": "com.desktop-pet.windows",
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        "nsis"
       ],
       "publisherName": "sinferous"
     },

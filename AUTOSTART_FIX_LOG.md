@@ -26,12 +26,10 @@ When checking why the application was not launching on Windows startup after a s
 
 To ensure a seamless, reliable experience for your friends when testing, the following solutions were developed and implemented:
 
-### 1. Switched to Combined Installer + Portable Targets
-* **File Modified:** [package.json](file:///j:/Work/Webtree%20Online/Desktop%20pet/windows/package.json)
-* **Action:** Added the `nsis` target in addition to `portable` under the build configuration.
-* **Benefit:** When building via `npm run dist`, two versions are generated:
-  - **`Luna Setup 1.0.0.exe` (NSIS Installer):** Highly recommended for distribution. It installs the application permanently to `%LOCALAPPDATA%\Programs\luna\Luna.exe`, creating stable registry entries that persist across PC restarts.
-  - **`Luna 1.0.0.exe` (Portable):** A standalone version that can be run directly.
+### 1. Switched to NSIS Setup Installer Only (No Portable Build)
+* **File Modified:** [package.json](file:///j:/Work/Webtree Online/Desktop pet/windows/package.json)
+* **Action:** Switched the build target from `portable` to `nsis`.
+* **Benefit:** The application now compiles *exclusively* as **`Luna Setup 1.0.0.exe` (NSIS Setup Installer)**. This makes the distribution and testing foolproof: your friends will install it in a permanent, stable location (`%LOCALAPPDATA%\Programs\luna\Luna.exe`), avoiding any temporary folder execution issues that could break the autostart Registry configuration.
 
 ### 2. Upgraded Electron to v32 (with Registry Quoting Fix)
 * **File Modified:** [package.json](file:///j:/Work/Webtree%20Online/Desktop%20pet/windows/package.json)
@@ -59,7 +57,6 @@ To ensure a seamless, reliable experience for your friends when testing, the fol
 
 * **Build Validation:** A clean compile was performed using `npm run dist` and completed successfully:
   - Assembled target `nsis` -> `dist\Luna Setup 1.0.0.exe`
-  - Assembled target `portable` -> `dist\Luna 1.0.0.exe`
 * **Startup Validation:** Verified that `npm start` initializes correctly without any runtime warnings or syntax errors on the updated Electron engine.
 
 ---
@@ -82,5 +79,5 @@ To make deployment and testing simple:
 2. **GitHub Actions Workflow**: The push automatically triggers the CI/CD pipeline configured in [.github/workflows/main.yml](file:///j:/Work/Webtree%20Online/Desktop%20pet/.github/workflows/main.yml).
 3. **Automated Artifact Generation**:
    - The workflow compiles the macOS version and packages it as **`Luna.dmg`**.
-   - The workflow compiles the Windows version and packages it as **`Luna Setup 1.0.0.exe`** and **`Luna 1.0.0.exe`**.
+   - The workflow compiles the Windows version and packages it as **`Luna Setup 1.0.0.exe`** (no portable version is built).
    - Your friends can download the fresh builds directly from the GitHub Actions run artifacts or the Releases page.
