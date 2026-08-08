@@ -54,21 +54,27 @@ function applySleepPrevention() {
 
 // Auto-start login item
 function applyAutoStart() {
-  const startupPath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
-  
-  if (app.isPackaged) {
-    app.setLoginItemSettings({
-      openAtLogin: settings.autoStart,
-      path: startupPath
-    });
-  } else {
-    // In development mode, we need to pass the app path as an argument to Electron
-    app.setLoginItemSettings({
-      openAtLogin: settings.autoStart,
-      path: startupPath,
-      args: [path.resolve(app.getAppPath())]
-    });
+  if (!app.isPackaged) {
+    // In development mode, do not register startup to avoid polluting the Windows Registry
+    // with local development paths (which fail if the path has spaces).
+    // We also clean up any potential dev registry entries.
+    try {
+      app.setLoginItemSettings({
+        openAtLogin: false,
+        path: app.getPath('exe'),
+        args: [path.resolve(app.getAppPath())]
+      });
+    } catch (e) {
+      console.error('Failed to clean up development autostart setting:', e);
+    }
+    return;
   }
+
+  const startupPath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
+  app.setLoginItemSettings({
+    openAtLogin: settings.autoStart,
+    path: startupPath
+  });
 }
 
 function createWindow() {
