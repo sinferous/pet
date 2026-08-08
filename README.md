@@ -35,7 +35,7 @@ Published by **sinferous** 🐾
 A lightweight, natively compiled Swift App utilizing AppKit and SpriteKit.
 
 #### Installation
-1. Go to **Releases** and download `DesktopPet.dmg`.
+1. Go to **Releases** and download `Luna.dmg`.
 2. Open the DMG and drag **Luna** to your Applications folder.
 3. **First Launch (Gatekeeper)**: Since it is an unsigned app, right-click **Luna** in Applications, select **Open**, and click **Open** in the confirmation dialog.
 

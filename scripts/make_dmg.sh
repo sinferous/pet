@@ -1,11 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-# Creates DesktopPet.dmg from the assembled .app bundle.
+# Creates Luna.dmg from the assembled .app bundle.
 # Usage: bash scripts/make_dmg.sh
 
-APP="dist/DesktopPet.app"
-DMG="dist/DesktopPet.dmg"
+APP="dist/Luna.app"
+DMG="dist/Luna.dmg"
 
 if [ ! -d "$APP" ]; then
   echo "ERROR: $APP not found. Run scripts/build_app.sh first."

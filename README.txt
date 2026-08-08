@@ -34,7 +34,7 @@ with custom, silence-friendly water reminders.
 
 1. macOS Version (Native Swift)
 ----------------------------------------
-* Open the "DesktopPet.dmg" package.
+* Open the "Luna.dmg" package.
 * Drag "Luna" to your Applications folder.
 * FIRST LAUNCH (Gatekeeper Bypass): Right-click (or Control-click)
   on the app in Applications, choose "Open", and click "Open" again in

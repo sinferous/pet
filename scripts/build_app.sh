@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-# Assembles the DesktopPet.app bundle from the release binary.
+# Assembles the Luna.app bundle from the release binary.
 # Intended to run on macOS (GitHub Actions runner or local).
 
-APP_DIR="dist/DesktopPet.app"
+APP_DIR="dist/Luna.app"
 CONTENTS="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS/MacOS"
 RESOURCES_DIR="$CONTENTS/Resources"
@@ -23,8 +23,8 @@ if [ ! -f "$BINARY" ]; then
   echo "       Run 'swift build -c release' first."
   exit 1
 fi
-cp "$BINARY" "$MACOS_DIR/DesktopPet"
-chmod +x "$MACOS_DIR/DesktopPet"
+cp "$BINARY" "$MACOS_DIR/Luna"
+chmod +x "$MACOS_DIR/Luna"
 
 echo "==> Copying Info.plist"
 cp Resources/Info.plist "$CONTENTS/Info.plist"
