@@ -185,3 +185,83 @@ canvas {
 #controlPanel .waterIntervalRow button {
   padding: 4px 10px;
 }
+
+/* Custom Prompt Dialog */
+#promptDialog {
+  display: none;
+  position: absolute;
+  top: 90px; /* center vertically inside the 320px tall window */
+  left: -26px; /* center a 180px wide dialog relative to 128px container: (128-180)/2 = -26px */
+  width: 180px;
+  background: #fffff0;
+  color: #010101;
+  border: 3px solid #010101;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 4px 4px 0px #010101;
+  z-index: 99999;
+  font-family: 'Courier New', Courier, monospace;
+  box-sizing: border-box;
+  pointer-events: auto; /* captured clicks */
+}
+
+#promptDialog label {
+  font-weight: bold;
+  font-size: 12px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+#promptInput {
+  width: 100%;
+  padding: 6px;
+  border: 2.5px solid #010101;
+  border-radius: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 6px;
+  border: 2.5px solid #010101;
+  border-radius: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #010101;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+
+.ok-btn {
+  background: #bbf2bb;
+}
+
+.ok-btn:hover {
+  background: #9ee69e;
+}
+
+.cancel-btn {
+  background: #ffb3b3;
+}
+
+.cancel-btn:hover {
+  background: #ff9999;
+}
+
+.modal-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #010101;
+}

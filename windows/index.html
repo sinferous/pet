@@ -40,6 +40,14 @@
       <span id="speechBubbleText">💧 Stay hydrated, human!</span>
     </div>
     <canvas id="petCanvas" width="128" height="320"></canvas>
+    <div id="promptDialog">
+      <label for="promptInput">Interval (minutes):</label>
+      <input type="number" id="promptInput" min="1" max="1440" value="60">
+      <div class="modal-buttons">
+        <button id="promptOkBtn" class="modal-btn ok-btn" onclick="submitPromptDialog()">OK</button>
+        <button id="promptCancelBtn" class="modal-btn cancel-btn" onclick="cancelPromptDialog()">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <div id="controlPanel">
@@ -978,6 +986,11 @@ window.addEventListener('contextmenu', (e) => {
 function handleMouseMove(e) {
   if (isDragging || !isElectron) return;
 
+  if (typeof isPromptDialogOpen !== 'undefined' && isPromptDialogOpen) {
+    ipcRenderer.send('set-ignore-mouse-events', false, { forward: true });
+    return;
+  }
+
   const closeEl = document.getElementById('speechBubbleClose');
   const isOverCloseBtn = e.target === closeEl || (e.target && e.target.closest('#speechBubbleClose'));
 
@@ -1331,6 +1344,51 @@ function pokePet() {
 }
 
 // Electron IPC listeners for tray menus
+let isPromptDialogOpen = false;
+let promptCallback = null;
+
+function showPromptDialog(defaultValue, callback) {
+  const dialog = document.getElementById('promptDialog');
+  const input = document.getElementById('promptInput');
+  if (!dialog || !input) return;
+
+  input.value = defaultValue;
+  dialog.style.display = 'block';
+  isPromptDialogOpen = true;
+  promptCallback = callback;
+
+  // Temporarily park the cat so it freezes in place while typing
+  behavior.setParked(true);
+
+  if (isElectron) {
+    ipcRenderer.send('set-ignore-mouse-events', false);
+  }
+}
+
+window.submitPromptDialog = () => {
+  const dialog = document.getElementById('promptDialog');
+  const input = document.getElementById('promptInput');
+  if (dialog && input) {
+    dialog.style.display = 'none';
+    isPromptDialogOpen = false;
+    behavior.setParked(false);
+    if (promptCallback) {
+      promptCallback(input.value);
+      promptCallback = null;
+    }
+  }
+};
+
+window.cancelPromptDialog = () => {
+  const dialog = document.getElementById('promptDialog');
+  if (dialog) {
+    dialog.style.display = 'none';
+    isPromptDialogOpen = false;
+    behavior.setParked(false);
+    promptCallback = null;
+  }
+};
+
 if (isElectron) {
   // Load initial settings
   ipcRenderer.invoke('get-settings').then((settings) => {
@@ -1377,18 +1435,19 @@ if (isElectron) {
   ipcRenderer.on('prompt-hydration-interval', (event) => {
     const input = document.getElementById('waterIntervalInput');
     const currentVal = input ? input.value : String(waterIntervalMinutes);
-    const result = prompt("How many minutes between hydration alerts? (1-1440)", currentVal);
-    if (result !== null) {
-      const parsed = parseInt(result, 10);
-      if (!isNaN(parsed)) {
-        const minutes = Math.max(1, Math.min(1440, parsed));
-        waterIntervalMinutes = minutes;
-        if (input) input.value = String(minutes);
-        
-        ipcRenderer.send('update-settings', { waterIntervalMinutes: minutes });
-        scheduleWaterReminder();
+    showPromptDialog(currentVal, (result) => {
+      if (result !== null) {
+        const parsed = parseInt(result, 10);
+        if (!isNaN(parsed)) {
+          const minutes = Math.max(1, Math.min(1440, parsed));
+          waterIntervalMinutes = minutes;
+          if (input) input.value = String(minutes);
+          
+          ipcRenderer.send('update-settings', { waterIntervalMinutes: minutes });
+          scheduleWaterReminder();
+        }
       }
-    }
+    });
   });
 }
 
