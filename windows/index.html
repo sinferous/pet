@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Desktop Pet</title>
+  <title>Luna</title>
   <link rel="stylesheet" href="style.css">
   <style>
     #error-banner {
@@ -1272,7 +1272,7 @@ function scheduleWaterReminder() {
   const ms = minutes * 60000;
   waterTimer = setInterval(() => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('Desktop Pet', {
+      new Notification('Luna', {
         body: 'Time to drink some water! 💧'
       });
     }

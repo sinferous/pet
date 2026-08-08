@@ -1,7 +1,8 @@
 {
-  "name": "desktop-pet-windows",
+  "name": "luna",
+  "productName": "Luna",
   "version": "1.0.0",
-  "description": "Windows port of Desktop Pet",
+  "description": "Windows desktop pet companion",
   "author": "sinferous",
   "main": "main.js",
   "scripts": {

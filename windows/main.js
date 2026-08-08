@@ -221,7 +221,7 @@ function getMenuTemplate() {
     },
     { type: 'separator' },
     {
-      label: 'Quit Desktop Pet',
+      label: 'Quit Luna',
       click: () => {
         app.quit();
       }
@@ -239,7 +239,7 @@ function createTray(iconImage) {
   }
   const icon = iconImage || nativeImage.createEmpty();
   tray = new Tray(icon);
-  tray.setToolTip('Desktop Pet');
+  tray.setToolTip('Luna');
   updateTrayMenu();
 }
 

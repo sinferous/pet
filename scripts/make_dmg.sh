@@ -17,7 +17,7 @@ rm -f "$DMG"
 
 echo "==> Creating DMG"
 hdiutil create \
-  -volname "Desktop Pet" \
+  -volname "Luna" \
   -srcfolder "$APP" \
   -ov \
   -format UDZO \

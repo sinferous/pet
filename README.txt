@@ -1,10 +1,10 @@
 ========================================================================
-                      🐱 DESKTOP PET (macOS & Windows)
+                          🐱 LUNA (macOS & Windows)
 ========================================================================
 Published by: sinferous 🐾
 License: MIT
 
-Welcome to Desktop Pet! A cute pixel-art companion that lives on your
+Welcome to Luna! A cute pixel-art companion that lives on your
 desktop, walks across your monitors, plays, sleeps, and keeps you hydrated
 with custom, silence-friendly water reminders.
 
@@ -35,7 +35,7 @@ with custom, silence-friendly water reminders.
 1. macOS Version (Native Swift)
 ----------------------------------------
 * Open the "DesktopPet.dmg" package.
-* Drag "Desktop Pet" to your Applications folder.
+* Drag "Luna" to your Applications folder.
 * FIRST LAUNCH (Gatekeeper Bypass): Right-click (or Control-click)
   on the app in Applications, choose "Open", and click "Open" again in
   the macOS security prompt.
@@ -43,7 +43,7 @@ with custom, silence-friendly water reminders.
 
 2. Windows Version (Electron)
 ----------------------------------------
-* Run the installer executable or launch "Desktop Pet.exe" from the build.
+* Run the installer executable or launch "Luna.exe" from the build.
 * Right-click the cat to open the context menu:
   - Select "Control Panel" to customize reminder intervals and trigger animations.
   - Select "Start at Login" to configure automatic startup.

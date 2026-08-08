@@ -1,4 +1,4 @@
-# 🐱 Desktop Pet (macOS & Windows)
+# 🐱 Luna (macOS & Windows)
 
 A cute pixel-art companion that lives on your desktop! It walks across your screens, plays, sleeps, follows your cursor, and keeps you hydrated with custom reminders.
 
@@ -36,8 +36,8 @@ A lightweight, natively compiled Swift App utilizing AppKit and SpriteKit.
 
 #### Installation
 1. Go to **Releases** and download `DesktopPet.dmg`.
-2. Open the DMG and drag **Desktop Pet** to your Applications folder.
-3. **First Launch (Gatekeeper)**: Since it is an unsigned app, right-click **Desktop Pet** in Applications, select **Open**, and click **Open** in the confirmation dialog.
+2. Open the DMG and drag **Luna** to your Applications folder.
+3. **First Launch (Gatekeeper)**: Since it is an unsigned app, right-click **Luna** in Applications, select **Open**, and click **Open** in the confirmation dialog.
 
 #### Controls & Menu bar
 A 🐱 tray icon in the system menu bar allows you to:
@@ -53,7 +53,7 @@ A smooth, custom-designed Windows companion built on Electron and web technology
 #### Installation
 1. Go to **Releases** and download the Windows release package.
 2. Run the installer or unpack the executable.
-3. Launch `Desktop Pet`.
+3. Launch `Luna`.
 
 #### Controls & Control Panel
 Right-click the cat on Windows to open the context menu:

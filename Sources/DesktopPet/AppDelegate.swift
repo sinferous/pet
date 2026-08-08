@@ -17,7 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         // Prevent App Nap from throttling the pet.
         activity = ProcessInfo.processInfo.beginActivity(
             options: [.userInitiated, .idleSystemSleepDisabled],
-            reason: "Animating desktop pet")
+            reason: "Animating Luna")
 
         UNUserNotificationCenter.current().delegate = self
 

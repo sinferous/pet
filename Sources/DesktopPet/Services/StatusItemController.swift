@@ -49,7 +49,7 @@ final class StatusItemController {
     // MARK: - Menu construction
 
     private func buildMenu() -> NSMenu {
-        let menu = NSMenu(title: "Desktop Pet")
+        let menu = NSMenu(title: "Luna")
 
         sleepItem.title = "Prevent Sleep"
         sleepItem.target = self
@@ -100,7 +100,7 @@ final class StatusItemController {
 
         menu.addItem(.separator())
 
-        let quitItem = NSMenuItem(title: "Quit Desktop Pet",
+        let quitItem = NSMenuItem(title: "Quit Luna",
                                   action: #selector(quitApp),
                                   keyEquivalent: "q")
         quitItem.target = self

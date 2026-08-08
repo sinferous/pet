@@ -533,7 +533,7 @@ function triggerWaterHydrationFlow() {
 // Water Reminder preview trigger (every 10 seconds for testing)
 setInterval(() => {
   if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-    new Notification('Desktop Pet', {
+    new Notification('Luna', {
       body: 'Time to drink some water! 💧'
     });
   }
