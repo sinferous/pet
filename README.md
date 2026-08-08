@@ -36,7 +36,9 @@ A lightweight, natively compiled Swift App utilizing AppKit and SpriteKit.
 
 #### Installation
 1. Go to **Releases** and download `Luna.dmg`.
-2. Open the DMG and drag **Luna** to your Applications folder.
+2. Open the DMG and drag **Luna** to your **Applications** folder.
+   > [!IMPORTANT]
+   > You **must** drag the app to Applications and run it from there. Running it directly from the mounted DMG or a temporary folder causes macOS path randomization (App Translocation), which will break the "Start at Login" feature.
 3. **First Launch (Gatekeeper)**: Since it is an unsigned app, right-click **Luna** in Applications, select **Open**, and click **Open** in the confirmation dialog.
 
 #### Controls & Menu bar
@@ -51,8 +53,10 @@ A 🐱 tray icon in the system menu bar allows you to:
 A smooth, custom-designed Windows companion built on Electron and web technology.
 
 #### Installation
-1. Go to **Releases** and download the Windows release package.
-2. Run the installer or unpack the executable.
+1. Go to **Releases** and download the Windows setup installer (`Luna Setup 1.0.0.exe`).
+2. Run the installer to install the application.
+   > [!IMPORTANT]
+   > You must run the setup installer to install Luna. Do not run the application directly from a temporary folder or zip extraction folder, as Windows clears temporary directories on system restart, which will break the "Start at Login" functionality.
 3. Launch `Luna`.
 
 #### Controls & Control Panel

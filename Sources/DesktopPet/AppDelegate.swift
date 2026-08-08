@@ -51,6 +51,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             sayHandler: { [weak petWindowController] in
                 petWindowController?.say()
             })
+
+        DispatchQueue.main.async { [weak self] in
+            self?.checkRunningFromTemp()
+        }
+    }
+
+    // MARK: - Temporary Location Check
+
+    private func checkRunningFromTemp() {
+        let path = Bundle.main.bundlePath
+        let lowercasePath = path.lowercased()
+        
+        let isTranslocated = lowercasePath.contains("apptranslocation")
+        let isMountedDmg = lowercasePath.hasPrefix("/volumes/")
+        
+        if isTranslocated || isMountedDmg {
+            NSApp.activate(ignoringOtherApps: true)
+            let alert = NSAlert()
+            alert.messageText = "Luna - Temporary Location Warning"
+            alert.informativeText = """
+                Luna is currently running from a temporary location or mounted disk image (DMG).
+                
+                The "Start at Login" feature will NOT work after a restart because temporary paths are cleared or randomized by macOS.
+                
+                To resolve this:
+                1. Move the application to a permanent folder (like your Applications folder).
+                2. Run the application from that permanent location.
+                """
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {

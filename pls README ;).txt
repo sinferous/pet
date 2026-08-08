@@ -63,6 +63,10 @@ A small desktop pet made to bring a little life to your workspace.
 
 * Open the "Luna.dmg" package.
 * Drag "Luna" to your Applications folder.
+  (Note: You MUST drag the application to the Applications folder and run it
+  from there instead of running it directly from the mounted DMG or temporary
+  folders. Running it outside Applications causes macOS path randomization
+  (translocation), which will prevent the "Start at Login" feature from working).
 * FIRST LAUNCH (Gatekeeper Bypass): Right-click (or Control-click)
   on the app in Applications, choose "Open", and click "Open" again in
   the macOS security prompt.
@@ -73,7 +77,8 @@ A small desktop pet made to bring a little life to your workspace.
 2. Windows Version (Electron)
 ------------------------------
 
-* Run the installer executable or launch "Luna.exe" from the build.
+* Install the application using the setup installer ("Luna Setup 1.0.0.exe").
+  (Note: You MUST install the application rather than running a portable version from a zip or temporary folder, otherwise the "Start at Login" feature will fail to function after a system restart).
 * Right-click Luna to open the context menu:
   - Select "Control Panel" to customize reminder intervals and trigger
     animations.
