@@ -18,6 +18,8 @@ final class PetWindowController {
     private var currentScreenIndex: Int = 0
     private var walkTarget: WalkTarget?
     private var parkWalkTarget: (x: Double, y: Double)? // stroll-to corner before parking
+    private var hydrationWalkTarget: (x: Double, y: Double)?
+    private var isHydrating = false
     private let walkSpeed: Double = 1.5 // points per frame (~90 px/s at 60 fps)
     private let runSpeed: Double = 4.0
     private let rollSpeed: Double = 1.5 // slow, relaxed tumbling while rolling
@@ -83,6 +85,15 @@ final class PetWindowController {
         // Wire behaviour state changes to animation.
         behavior.onStateChange = { [weak self] state in
             guard let self else { return }
+            
+            if state == .drink {
+                if !self.isHydrating {
+                    self.triggerWaterHydrationFlow()
+                    return
+                }
+                self.isHydrating = false
+            }
+            
             let anim = state.animation
             let frames = PixelPetGenerator.frames(for: anim)
             self.scene.play(animation: anim, frames: frames)
@@ -90,7 +101,7 @@ final class PetWindowController {
             if state == .walk || state == .run {
                 self.startWalk()
             } else if state == .react {
-                self.scene.showRandomReactSpeechBubble()
+                // Silenced meow/purr bubbles on click
             }
 
             // Celebration effects.
@@ -118,19 +129,7 @@ final class PetWindowController {
             self.behavior.setCursor(inRange: inRange)
         }
 
-        // Setup random meowing timer every 10 seconds (35% chance if idle/walking)
-        self.meowTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            if self.behavior.state == .idle || self.behavior.state == .walk {
-                let roll = Double.random(in: 0...1)
-                if roll < 0.15 {
-                    // Random "say" trigger
-                    self.scene.showSayBubble()
-                } else if roll < 0.50 {
-                    self.scene.showRandomMeowSpeechBubble()
-                }
-            }
-        }
+        // Random background meows timer removed to keep the cat quiet as requested.
     }
 
     /// Triggered from the menu "Say" item — shows "sathya sathya sathya" bubble.
@@ -153,7 +152,9 @@ final class PetWindowController {
         behavior.tick()
         scene.cheerActive = (behavior.state == .cheer)
 
-        if let target = parkWalkTarget {
+        if let target = hydrationWalkTarget {
+            advanceHydrationWalk(to: target)
+        } else if let target = parkWalkTarget {
             advanceParkWalk(to: target)
         } else {
             switch behavior.state {
@@ -303,6 +304,43 @@ final class PetWindowController {
         window.setFrameOrigin(NSPoint(x: window.frame.origin.x + clampedDx,
                                       y: window.frame.origin.y))
         baseWindowY = window.frame.origin.y
+    }
+
+    private func advanceHydrationWalk(to target: (x: Double, y: Double)) {
+        let curX = Double(window.frame.origin.x)
+        let curY = Double(window.frame.origin.y)
+        let dx = target.x - curX
+        let dy = target.y - curY
+        let len = (dx * dx + dy * dy).squareRoot()
+        if len > 0 {
+            let s = min(runSpeed, len)
+            window.setFrameOrigin(NSPoint(x: curX + dx / len * s,
+                                          y: curY + dy / len * s))
+            facing = dx >= 0 ? .right : .left
+            scene.setFacing(facing)
+            baseWindowY = window.frame.origin.y
+        }
+        if len < runSpeed * 1.5 {
+            hydrationWalkTarget = nil
+            isHydrating = true
+            behavior.setParked(false)
+            behavior.enter(.drink)
+        }
+    }
+
+    func triggerWaterHydrationFlow() {
+        let screens = ScreenAdapter.screenRects()
+        guard !screens.isEmpty else { return }
+        let s = screens[0]
+        
+        let targetX = s.minX + (s.width - Double(winWidth)) / 2
+        let targetY = s.minY + (s.height - Double(winHeight)) / 2 - 100
+        
+        hydrationWalkTarget = (x: targetX, y: targetY)
+        
+        let runFrames = PixelPetGenerator.frames(for: .run)
+        scene.play(animation: .run, frames: runFrames)
+        behavior.setParked(true)
     }
 
     // MARK: - Click / Drag
