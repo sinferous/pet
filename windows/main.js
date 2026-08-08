@@ -54,10 +54,21 @@ function applySleepPrevention() {
 
 // Auto-start login item
 function applyAutoStart() {
-  app.setLoginItemSettings({
-    openAtLogin: settings.autoStart,
-    path: app.getPath('exe')
-  });
+  const startupPath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
+  
+  if (app.isPackaged) {
+    app.setLoginItemSettings({
+      openAtLogin: settings.autoStart,
+      path: startupPath
+    });
+  } else {
+    // In development mode, we need to pass the app path as an argument to Electron
+    app.setLoginItemSettings({
+      openAtLogin: settings.autoStart,
+      path: startupPath,
+      args: [path.resolve(app.getAppPath())]
+    });
+  }
 }
 
 function createWindow() {
