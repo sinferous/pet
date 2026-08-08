@@ -68,7 +68,8 @@ public enum ScreenNavigator {
                             currentY: Double,
                             facing: Facing,
                             speed: Double,
-                            screens: [ScreenRect]) -> WalkStep {
+                            screens: [ScreenRect],
+                            width: Double = 0.0) -> WalkStep {
         guard let screen = screens.first(where: { $0.contains(x: currentX, y: currentY) }) else {
             return WalkStep(x: currentX, y: currentY, facing: facing, crossedScreen: false)
         }
@@ -78,18 +79,18 @@ public enum ScreenNavigator {
         var resultFacing = facing
         var crossed = false
 
-        if facing == .right, x >= screen.maxX {
+        if facing == .right, x >= screen.maxX - width {
             if let next = adjacentScreen(to: .right, of: screen, screens: screens) {
                 x = next.minX
                 y = next.minY
                 crossed = true
             } else {
-                x = screen.maxX - 0.1
+                x = screen.maxX - width - 0.1
                 resultFacing = .left
             }
         } else if facing == .left, x <= screen.minX {
             if let next = adjacentScreen(to: .left, of: screen, screens: screens) {
-                x = next.maxX - 0.1
+                x = next.maxX - width - 0.1
                 y = next.minY
                 crossed = true
             } else {

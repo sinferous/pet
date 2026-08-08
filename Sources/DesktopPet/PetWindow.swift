@@ -30,6 +30,13 @@ final class PetSKView: SKView {
     var alphaProvider: ((_ windowPoint: NSPoint) -> UInt8)?
 
     override func hitTest(_ point: NSPoint) -> NSView? {
+        if let scene = self.scene {
+            let scenePt = convert(point, to: scene)
+            if let closeNode = scene.childNode(withName: "//closeButton"),
+               closeNode.contains(scenePt) {
+                return super.hitTest(point)
+            }
+        }
         if let alpha = alphaProvider?(point), alpha < 8 {
             return nil // click falls through
         }

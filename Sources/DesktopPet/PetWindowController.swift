@@ -32,6 +32,7 @@ final class PetWindowController {
     private let petScale: CGFloat = 8.0   // 16px sprite → 128pt on screen
     private let petWidth: CGFloat = 128
     private let petHeight: CGFloat = 120
+    private let winWidth: CGFloat = 256    // total window width to accommodate speech bubble
     private let headroom: CGFloat = 200    // vertical space above the cat for effects
     private let winHeight: CGFloat = 320   // total pet-window height (petHeight + headroom)
     private let margin: CGFloat = 60      // don't walk into corners
@@ -43,9 +44,9 @@ final class PetWindowController {
         // than the cat (petHeight + headroom); the cat sprite sits at the bottom
         // of the window, so it stands on the floor while effects rise above it.
         let screenFrame = NSScreen.main?.frame ?? NSRect(x: 0, y: 0, width: 800, height: 600)
-        let origin = NSPoint(x: screenFrame.midX - petWidth / 2,
+        let origin = NSPoint(x: screenFrame.midX - winWidth / 2,
                              y: screenFrame.minY)
-        let frameRect = NSRect(origin: origin, size: NSSize(width: petWidth, height: winHeight))
+        let frameRect = NSRect(origin: origin, size: NSSize(width: winWidth, height: winHeight))
 
         window = PetWindow(contentRect: frameRect)
         baseWindowY = origin.y
@@ -69,6 +70,9 @@ final class PetWindowController {
         scene.onMouseDown = { [weak self] in self?.handleMouseDown(at: $0) }
         scene.onMouseDragged = { [weak self] in self?.handleMouseDragged(to: $0) }
         scene.onMouseUp = { [weak self] in self?.handleMouseUp() }
+        scene.onCloseSpeechBubble = { [weak self] in
+            self?.behavior.enter(.run) // run somewhere else immediately!
+        }
 
         // Identify the current screen index.
         let screens = ScreenAdapter.screenRects()
@@ -200,14 +204,15 @@ final class PetWindowController {
         let curY = Double(window.frame.origin.y)
         let step = ScreenNavigator.step(currentX: curX, currentY: curY,
                                   facing: facing, speed: speed,
-                                  screens: screens)
+                                  screens: screens,
+                                  width: Double(winWidth))
         facing = step.facing
         scene.setFacing(step.facing)
         window.setFrameOrigin(NSPoint(x: step.x, y: step.y))
         baseWindowY = CGFloat(step.y)
 
         if step.crossedScreen, let idx = ScreenAdapter.screenIndex(
-            containing: NSPoint(x: step.x + Double(petWidth) / 2, y: step.y),
+            containing: NSPoint(x: step.x + Double(winWidth) / 2, y: step.y),
             in: screens) {
             currentScreenIndex = idx
         }
@@ -230,8 +235,8 @@ final class PetWindowController {
         if x <= screen.minX {
             x = screen.minX + 0.1
             rollDir = 1
-        } else if x >= screen.maxX - Double(petWidth) {
-            x = screen.maxX - Double(petWidth) - 0.1
+        } else if x >= screen.maxX - Double(winWidth) {
+            x = screen.maxX - Double(winWidth) - 0.1
             rollDir = -1
         }
         facing = rollDir > 0 ? .right : .left
@@ -303,10 +308,9 @@ final class PetWindowController {
     // MARK: - Click / Drag
 
     private func handleMouseDown(at scenePoint: NSPoint) {
-        let screenPoint = window.convertPoint(toScreen:
-            skView.convert(scenePoint, from: scene))
-        dragOffset = NSPoint(x: screenPoint.x - window.frame.origin.x,
-                             y: screenPoint.y - window.frame.origin.y)
+        let mouseLoc = NSEvent.mouseLocation
+        dragOffset = NSPoint(x: mouseLoc.x - window.frame.origin.x,
+                             y: mouseLoc.y - window.frame.origin.y)
     }
 
     private func handleMouseDragged(to scenePoint: NSPoint) {
@@ -314,20 +318,18 @@ final class PetWindowController {
             isDragging = true
             behavior.handleDragStart()
         }
-        let screenPoint = window.convertPoint(toScreen:
-            skView.convert(scenePoint, from: scene))
-        var newX = screenPoint.x - dragOffset.x
-        var newY = screenPoint.y - dragOffset.y
+        let mouseLoc = NSEvent.mouseLocation
+        var newX = mouseLoc.x - dragOffset.x
+        var newY = mouseLoc.y - dragOffset.y
 
         // Clamp to screen bounds to prevent dragging off-screen
         let screens = ScreenAdapter.screenRects()
         if !screens.isEmpty {
-            let mouseLoc = NSEvent.mouseLocation
             let idx = ScreenAdapter.screenIndex(containing: mouseLoc, in: screens) ?? 0
             if idx < screens.count {
                 let s = screens[idx]
-                newX = max(CGFloat(s.minX), min(CGFloat(s.maxX) - petWidth, newX))
-                newY = max(CGFloat(s.minY), min(CGFloat(s.maxY) - petHeight, newY))
+                newX = max(CGFloat(s.minX), min(CGFloat(s.maxX) - winWidth, newX))
+                newY = max(CGFloat(s.minY), min(CGFloat(s.maxY) - winHeight, newY))
             }
         }
         window.setFrameOrigin(NSPoint(x: newX, y: newY))

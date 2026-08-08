@@ -151,12 +151,15 @@ final class PetScene: SKScene {
     ]
     
     private var activeSpeechBubble: SKNode?
+    var onCloseSpeechBubble: (() -> Void)?
     
-    func showSpeechBubble(text: String, duration: TimeInterval) {
+    func showSpeechBubble(text: String, duration: TimeInterval, isWaterReminder: Bool = false) {
         activeSpeechBubble?.removeFromParent()
         activeSpeechBubble = nil
         
-        let bubble = SKShapeNode(rectOf: CGSize(width: 170, height: 44), cornerRadius: 10)
+        let bubbleWidth: CGFloat = 200
+        let bubbleHeight: CGFloat = 44
+        let bubble = SKShapeNode(rectOf: CGSize(width: bubbleWidth, height: bubbleHeight), cornerRadius: 10)
         bubble.fillColor = NSColor(red: 1.0, green: 1.0, blue: 0.94, alpha: 1.0) // retro cream
         bubble.strokeColor = .black
         bubble.lineWidth = 2.5
@@ -164,7 +167,7 @@ final class PetScene: SKScene {
         bubble.zPosition = 100
         
         // Add hard retro black shadow
-        let shadow = SKShapeNode(rectOf: CGSize(width: 170, height: 44), cornerRadius: 10)
+        let shadow = SKShapeNode(rectOf: CGSize(width: bubbleWidth, height: bubbleHeight), cornerRadius: 10)
         shadow.fillColor = .black
         shadow.strokeColor = .black
         shadow.lineWidth = 0
@@ -179,20 +182,43 @@ final class PetScene: SKScene {
         label.text = text
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center
-        label.position = CGPoint(x: 0, y: 0)
+        label.position = CGPoint(x: isWaterReminder ? -8 : 0, y: 0) // shift left slightly if close button is present
         label.zPosition = 1
         bubble.addChild(label)
-        
-        // Auto-remove and clear active reference
-        bubble.run(SKAction.sequence([
-            SKAction.wait(forDuration: duration),
-            SKAction.run { [weak self, weak bubble] in
-                if self?.activeSpeechBubble == bubble {
-                    self?.activeSpeechBubble = nil
-                }
-            },
-            SKAction.removeFromParent()
-        ]))
+
+        if isWaterReminder {
+            // Add red circle close button
+            let closeBtn = SKShapeNode(circleOfRadius: 10)
+            closeBtn.name = "closeButton"
+            closeBtn.fillColor = .systemRed
+            closeBtn.strokeColor = .black
+            closeBtn.lineWidth = 2.5
+            closeBtn.position = CGPoint(x: bubbleWidth / 2, y: bubbleHeight / 2) // top-right corner
+            closeBtn.zPosition = 10
+            
+            // Add close icon label (X)
+            let closeLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+            closeLabel.text = "×"
+            closeLabel.fontSize = 14
+            closeLabel.fontColor = .white
+            closeLabel.verticalAlignmentMode = .center
+            closeLabel.horizontalAlignmentMode = .center
+            closeLabel.position = CGPoint(x: 0, y: -0.5) // center align adjustment
+            closeLabel.zPosition = 1
+            closeBtn.addChild(closeLabel)
+            bubble.addChild(closeBtn)
+        } else {
+            // Auto-remove and clear active reference (only for non-water reminders)
+            bubble.run(SKAction.sequence([
+                SKAction.wait(forDuration: duration),
+                SKAction.run { [weak self, weak bubble] in
+                    if self?.activeSpeechBubble == bubble {
+                        self?.activeSpeechBubble = nil
+                    }
+                },
+                SKAction.removeFromParent()
+            ]))
+        }
         
         addChild(bubble)
         activeSpeechBubble = bubble
@@ -200,7 +226,7 @@ final class PetScene: SKScene {
 
     private func showWaterSpeechBubble() {
         let txt = waterSentences.randomElement() ?? "💧 Drink water!"
-        showSpeechBubble(text: txt, duration: 6.0)
+        showSpeechBubble(text: txt, duration: 6.0, isWaterReminder: true)
     }
 
     func showRandomMeowSpeechBubble() {
@@ -252,7 +278,7 @@ final class PetScene: SKScene {
             piece.fillColor = confettiColors.randomElement() ?? .systemRed
             piece.strokeColor = .clear
             piece.lineWidth = 0
-            piece.position = CGPoint(x: winW / 2 + CGFloat.random(in: -winW / 2 ... winW / 2),
+            piece.position = CGPoint(x: CGFloat.random(in: -winW / 2 ... winW / 2),
                                      y: CGFloat.random(in: 20...90))
             piece.zPosition = 50
             addChild(piece)
@@ -273,7 +299,7 @@ final class PetScene: SKScene {
             let label = SKLabelNode(text: "❤️")
             label.fontSize = CGFloat.random(in: 10...24)
             label.verticalAlignmentMode = .center
-            label.position = CGPoint(x: petSize.width * CGFloat.random(in: 0.15...0.85),
+            label.position = CGPoint(x: CGFloat.random(in: -petSize.width * 0.35 ... petSize.width * 0.35),
                                      y: CGFloat.random(in: 20...60))
             label.zPosition = 50
             addChild(label)
@@ -295,7 +321,7 @@ final class PetScene: SKScene {
         ball.fillColor = NSColor(red: 0.91, green: 0.35, blue: 0.05, alpha: 1) // #e8590c
         ball.strokeColor = NSColor(red: 0.76, green: 0.15, blue: 0.36, alpha: 1) // #c2255c
         ball.lineWidth = 2
-        ball.position = CGPoint(x: petSize.width / 2, y: 50)
+        ball.position = CGPoint(x: 0, y: 50)
         ball.zPosition = 40
         addChild(ball)
         woolBallNode = ball
@@ -324,8 +350,8 @@ final class PetScene: SKScene {
 
             let w = c.node.frame.width
             let h = c.node.frame.height
-            if x - w / 2 <= 0 { x = w / 2; c.vx = abs(c.vx) * 0.8 }
-            if x + w / 2 >= winW { x = winW - w / 2; c.vx = -abs(c.vx) * 0.8 }
+            if x - w / 2 <= -winW / 2 { x = -winW / 2 + w / 2; c.vx = abs(c.vx) * 0.8 }
+            if x + w / 2 >= winW / 2 { x = winW / 2 - w / 2; c.vx = -abs(c.vx) * 0.8 }
             if y <= 2 { y = 2; c.vy = abs(c.vy) * 0.6 }
             if y + h / 2 >= winH - 6 { y = winH - 6 - h / 2; c.vy = 0; c.vx *= 0.9 }
 
@@ -348,8 +374,8 @@ final class PetScene: SKScene {
             h.node.position.y += h.vy * CGFloat(dt)
             h.node.alpha = CGFloat(min(1, h.life * 2))
 
-            if h.node.position.x <= 4 { h.node.position.x = 4 }
-            if h.node.position.x >= winW - 4 { h.node.position.x = winW - 4 }
+            if h.node.position.x <= -winW / 2 + 4 { h.node.position.x = -winW / 2 + 4 }
+            if h.node.position.x >= winW / 2 - 4 { h.node.position.x = winW / 2 - 4 }
 
             if h.life <= 0 {
                 h.node.removeFromParent()
@@ -365,19 +391,19 @@ final class PetScene: SKScene {
             var x = ball.position.x + woolBallVX * CGFloat(dt)
             var y = ball.position.y + woolBallVY * CGFloat(dt)
 
-            if abs(x - petSize.width / 2) < petSize.width * 0.55 && y < petSize.height * 0.55 {
-                woolBallVX += (x < petSize.width / 2 ? -1 : 1) * 300 * CGFloat(dt)
+            if abs(x) < petSize.width * 0.55 && y < petSize.height * 0.55 {
+                woolBallVX += (x < 0 ? -1 : 1) * 300 * CGFloat(dt)
             }
             woolBallVX = max(-200, min(200, woolBallVX))
 
             if y + 10 >= winH - 6 { y = winH - 6 - 10; woolBallVY = -woolBallVY * 0.7; woolBallVX *= 0.98 }
             if y - 10 <= 2 { y = 2 + 10; woolBallVY = abs(woolBallVY) * 0.7 }
-            if x - 10 <= 2 { x = 2 + 10; woolBallVX = abs(woolBallVX) * 0.9 }
-            if x + 10 >= winW - 2 { x = winW - 2 - 10; woolBallVX = -abs(woolBallVX) * 0.9 }
+            if x - 10 <= -winW / 2 + 2 { x = -winW / 2 + 2 + 10; woolBallVX = abs(woolBallVX) * 0.9 }
+            if x + 10 >= winW / 2 - 2 { x = winW / 2 - 2 - 10; woolBallVX = -abs(woolBallVX) * 0.9 }
             ball.position = CGPoint(x: x, y: y)
 
             // Face the ball while playing with it.
-            petSprite.xScale = (x < petSize.width / 2 ? -1 : 1) * abs(petSprite.xScale)
+            petSprite.xScale = (x < 0 ? -1 : 1) * abs(petSprite.xScale)
         }
 
         // Gentle confetti trickle while the cat is cheering.
@@ -405,7 +431,15 @@ final class PetScene: SKScene {
     // MARK: - Mouse handling
 
     override func mouseDown(with event: NSEvent) {
-        onMouseDown?(event.location(in: self))
+        let scenePt = event.location(in: self)
+        if let closeNode = childNode(withName: "//closeButton"),
+           closeNode.contains(scenePt) {
+            activeSpeechBubble?.removeFromParent()
+            activeSpeechBubble = nil
+            onCloseSpeechBubble?()
+            return
+        }
+        onMouseDown?(scenePt)
     }
 
     override func mouseDragged(with event: NSEvent) {
