@@ -73,7 +73,7 @@ final class PetWindowController {
         scene.onMouseDragged = { [weak self] in self?.handleMouseDragged(to: $0) }
         scene.onMouseUp = { [weak self] in self?.handleMouseUp() }
         scene.onCloseSpeechBubble = { [weak self] in
-            self?.behavior.enter(.run) // run somewhere else immediately!
+            self?.behavior.triggerActivity(.run) // run somewhere else immediately!
         }
 
         // Identify the current screen index.
@@ -324,7 +324,7 @@ final class PetWindowController {
             hydrationWalkTarget = nil
             isHydrating = true
             behavior.setParked(false)
-            behavior.enter(.drink)
+            behavior.triggerActivity(.drink)
         }
     }
 
