@@ -224,9 +224,7 @@ class BehaviorMachine {
       this.enter(PetState.sleep);
     } else if (roll < 0.82) {
       this.enter(PetState.react);
-    } else if (roll < 0.87) {
-      this.enter(PetState.drink);
-    } else if (roll < 0.94) {
+    } else if (roll < 0.89) {
       this.enter(PetState.follow);
     } else {
       this.enter(PetState.idle);

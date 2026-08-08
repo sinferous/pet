@@ -202,9 +202,7 @@ public final class BehaviorMachine {
             enter(.sleep)
         } else if roll < 0.82 {
             enter(.react)
-        } else if roll < 0.87 {
-            enter(.drink)
-        } else if roll < 0.94 {
+        } else if roll < 0.89 {
             enter(.follow)
         } else {
             enter(.idle)
