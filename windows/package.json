@@ -2,6 +2,7 @@
   "name": "desktop-pet-windows",
   "version": "1.0.0",
   "description": "Windows port of Desktop Pet",
+  "author": "sinferous",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -16,7 +17,8 @@
     "win": {
       "target": [
         "portable"
-      ]
+      ],
+      "publisherName": "sinferous"
     },
     "directories": {
       "output": "dist"
