@@ -1,6 +1,6 @@
 ========================================================================
-                           🐱 LUNA
-                    macOS & Windows Desktop Pet
+                            🐱 LUNA
+              macOS, Windows & Ubuntu (Linux) Desktop Pet
 ========================================================================
 
 Published by: sinferous 🐾
@@ -74,14 +74,22 @@ A small desktop pet made to bring a little life to your workspace.
   settings.
 
 
-2. Windows Version (Electron)
-------------------------------
+2. Cross-Platform Desktop Version (Windows & Ubuntu Linux)
+-----------------------------------------------------------
 
+Windows:
 * Install the application using the setup installer ("Luna Setup 1.0.0.exe").
   (Note: You MUST install the application rather than running a portable version from a zip or temporary folder, otherwise the "Start at Login" feature will fail to function after a system restart).
 * Right-click Luna to open the context menu:
-  - Select "Control Panel" to customize reminder intervals and trigger
-    animations.
+  - Select "Control Panel" to customize reminder intervals and trigger animations.
+  - Select "Start at Login" to configure automatic startup.
+  - Select "Quit" to exit.
+
+Ubuntu (Linux):
+* Install using the Debian package ("luna_1.0.0_amd64.deb") or run the standalone package ("Luna-1.0.0.AppImage").
+  (Note: For the AppImage, right-click the file, choose "Properties" -> "Permissions", and check "Allow executing file as program", or run `chmod +x Luna-1.0.0.AppImage` from your terminal).
+* Right-click Luna to open the context menu:
+  - Select "Control Panel" to customize reminder intervals and trigger animations.
   - Select "Start at Login" to configure automatic startup.
   - Select "Quit" to exit.
 
@@ -102,12 +110,14 @@ freeze her:
 🛠️ HOW TO BUILD FROM SOURCE
 ------------------------------------------------------------------------
 
-Windows Version:
+Cross-Platform Desktop Version (Windows & Linux):
 
 * Install Node.js (with npm).
-* Run "npm install" in the project root to install dependencies.
+* Navigate to the `desktop` folder (`cd desktop`).
+* Run "npm install" to install dependencies.
 * Run "npm start" to run in development mode.
-* Run "npm run package" to package for distribution.
+* Run "npm run dist" to package for Windows distribution.
+* Run "npm run dist:linux" to package for Linux (AppImage & deb) distribution.
 
 
 macOS Version:

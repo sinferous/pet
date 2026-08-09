@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_pink">#FFDC5A88</color>
+    <color name="background_dark">#FF121214</color>
+    <color name="black">#FF000000</color>
+    <color name="color_green">#FF4CAF50</color>
+    <color name="color_red">#FFF44336</color>
+    <color name="primary_teal">#FF81BEC9</color>
+    <color name="surface_dark">#FF1A1A1E</color>
+    <color name="text_primary">#FFE1E1E6</color>
+    <color name="text_secondary">#FF8F8F98</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="app_name">Luna Mobile</string>
+    <string name="btn_start">Start Luna 🐱</string>
+    <string name="btn_stop">Stop Luna 💤</string>
+    <string name="perm_overlay_desc">Allows Luna to float on your screen while you use other apps.</string>
+    <string name="perm_overlay_title">Draw Over Other Apps</string>
+    <string name="perm_usage_desc">Allows Luna to notice which app is open and react to usage habits.</string>
+    <string name="perm_usage_title">Usage Access Stats</string>
+    <string name="service_notification_desc">Luna is keeping you company and checking hydration/screentime.</string>
+    <string name="service_notification_title">Luna is on screen</string>
+    <string name="status_granted">Granted</string>
+    <string name="status_missing">Missing (Tap to setup)</string>
+    <string name="title_permissions">Permissions Setup</string>
+    <style name="Theme.LunaMobile" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/primary_teal</item>
+        <item name="colorSecondary">@color/accent_pink</item>
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="android:statusBarColor">@color/background_dark</item>
+    </style>
+</resources>

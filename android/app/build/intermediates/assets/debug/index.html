@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Luna Mobile Overlay</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Full transparent viewport */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="petContainer">
+    <div id="speechBubble">
+      <span id="speechBubbleText">💧 Stay hydrated, human!</span>
+    </div>
+    <canvas id="petCanvas" width="128" height="120"></canvas>
+  </div>
+
+  <script src="behavior.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

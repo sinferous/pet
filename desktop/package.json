@@ -1,0 +1,44 @@
+{
+  "name": "luna",
+  "productName": "Luna",
+  "version": "1.0.0",
+  "description": "Cross-platform desktop pet companion",
+  "author": "sinferous",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "dist:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.desktop-pet.desktop",
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "publisherName": "sinferous"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Luna"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "artwork/idle/0.svg"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}

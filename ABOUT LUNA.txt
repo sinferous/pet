@@ -1,0 +1,531 @@
+========================================================================
+                           🐱 ABOUT LUNA
+               Purpose, Functions & Design Philosophy
+========================================================================
+
+Published by: sinferous 🐾
+License: MIT
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          1. PURPOSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Luna is a cross-platform desktop companion application — a small,
+animated pixel-art cat that lives directly on your screen.
+
+The purpose of Luna is simple:
+
+  * To bring warmth and personality to an otherwise cold, utilitarian
+    desktop environment.
+
+  * To serve as a gentle, non-intrusive wellness tool that reminds
+    users to stay hydrated throughout the day.
+
+  * To provide a small moment of delight and emotional connection in
+    the middle of long work sessions.
+
+Luna is not a productivity tool. Luna is not a game. Luna is a
+companion — something that exists alongside your work, quietly making
+your digital space feel a little more alive.
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                    2. THE PROBLEM LUNA SOLVES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Modern desktop environments are designed purely for function. They are
+efficient, but they are also sterile. People spend 8–12 hours a day
+staring at screens — at spreadsheets, code editors, email clients, and
+browser tabs. There is no warmth. No personality. No life.
+
+This creates two tangible problems:
+
+  PROBLEM 1: SCREEN FATIGUE & EMOTIONAL DISCONNECT
+  -------------------------------------------------
+  Long screen time leads to a kind of emotional numbness. Users report
+  feeling drained, isolated, and detached after extended work sessions.
+  The desktop itself offers zero emotional engagement — it is a tool,
+  and nothing more.
+
+  Luna addresses this by introducing a living, breathing presence on
+  your screen. The cat walks, sleeps, plays, reacts when clicked,
+  follows your cursor, and performs spontaneous animations. It is a
+  small thing, but it creates a genuine emotional micro-interaction
+  that breaks the monotony of the workday.
+
+  PROBLEM 2: DEHYDRATION DURING LONG WORK SESSIONS
+  -------------------------------------------------
+  Studies consistently show that people forget to drink water while
+  working at a computer. Dehydration leads to reduced concentration,
+  headaches, fatigue, and decreased cognitive performance — the exact
+  things that harm productivity.
+
+  Most reminder apps solve this with intrusive notifications or
+  pop-ups that interrupt workflow. Luna takes a different approach:
+  the cat itself runs to the center of your screen and holds up a
+  water bottle with a gentle, playful message. The reminder feels
+  like it comes from a companion, not from a system alert. This
+  makes users far more likely to actually act on it.
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               3. WHY FUN IS NECESSARY (NOT OPTIONAL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+There is a common misconception that fun and productivity are opposing
+forces. That anything "fun" on a computer is a distraction. This is
+wrong, and here is why:
+
+  * MICRO-BREAKS IMPROVE FOCUS. Research in cognitive psychology shows
+    that brief moments of positive emotion — even something as small
+    as watching a cat animation for 2 seconds — can reset attention
+    and reduce mental fatigue. Luna provides these micro-breaks
+    passively, without requiring the user to actively seek them out.
+
+  * EMOTIONAL DESIGN DRIVES ENGAGEMENT. Users who feel an emotional
+    connection to their environment are more engaged, more satisfied,
+    and less likely to burn out. A pet that reacts when you pet it,
+    follows your cursor, or curls up and sleeps when idle creates a
+    subtle but real sense of companionship.
+
+  * PLAYFUL REMINDERS ARE MORE EFFECTIVE. A cold notification that
+    says "Drink water" is easy to dismiss. A small cat that sprints
+    across your screen and holds up a tiny bottle is charming — and
+    charming things get attention.
+
+  * PERSONALITY MAKES SOFTWARE MEMORABLE. The most beloved software
+    products are the ones with personality. Luna turns a desktop —
+    something purely functional — into something with character.
+
+Fun is not a luxury. Fun is a design decision that makes software
+more humane, more engaging, and ultimately more effective.
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+             4. APPLICATION ARCHITECTURE OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Luna is a DUAL-PLATFORM application with native implementations for
+both macOS and Windows.
+
+  ┌────────────────────────────────────────────────────────────────┐
+  │                     LUNA APPLICATION                          │
+  │                                                                │
+  │   ┌──────────────────────┐     ┌──────────────────────────┐   │
+  │   │   macOS (Swift)      │     │  Cross-Platform Desktop  │   │
+  │   │   AppKit + SpriteKit │     │   (Windows & Linux)      │   │
+  │   │   Native compiled    │     │   Electron + HTML5/JS    │   │
+  │   └──────────────────────┘     └──────────────────────────┘   │
+  │                                                                │
+  │   ┌──────────────────────────────────────────────────────┐     │
+  │   │        Shared Core: BehaviorMachine Engine           │     │
+  │   │   (State machine, animation logic, screen nav)       │     │
+  │   └──────────────────────────────────────────────────────┘     │
+  │                                                                │
+  │   ┌──────────────────────────────────────────────────────┐     │
+  │   │     Shared Assets: Procedural SVG Sprite System      │     │
+  │   │   (Generated from a single Cat.svg base model)       │     │
+  │   └──────────────────────────────────────────────────────┘     │
+  └────────────────────────────────────────────────────────────────┘
+
+  macOS Version:
+    Language:       Swift 5.9
+    Frameworks:     AppKit, SpriteKit, UserNotifications
+    Window:         Transparent, borderless, always-on-top NSWindow
+    Rendering:      SpriteKit scene with SKTexture animation
+    Build:          Swift Package Manager
+
+  Desktop Version (Windows & Linux):
+    Language:       JavaScript (ES6+)
+    Framework:      Electron 32.0
+    Window:         Transparent, frameless BrowserWindow
+    Rendering:      HTML5 Canvas 2D context
+    Build:          npm + electron-builder
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              5. COMPLETE FUNCTION & FEATURE BREAKDOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  5.1  PET BEHAVIOR & ANIMATION SYSTEM
+  ────────────────────────────────────────
+
+  Luna has 14 distinct behavioral states, each with its own animation
+  set and timing rules. The behavior is governed by a finite state
+  machine called the BehaviorMachine.
+
+  State            Frames   Duration       Description
+  ─────────────────────────────────────────────────────────────────
+  IDLE             4        5–15 sec       Standing still, gentle bob,
+                                           occasional blink
+  WALK             4        10–25 sec      Walking to a random target
+                                           across screens
+  RUN              4        5–15 sec       Fast sprint with forward lean
+                                           and streaming tail
+  SLEEP            2        10–20 sec      Curled-up pose with floating
+                                           "Zzz" overlay
+  DRINK            4        6 sec          Picks up a water bottle and
+                                           tilts it to drink
+  PLAY             3        5–9 sec        Squash/stretch bounce with
+                                           happy eyes
+  REACT            2        2.5 sec        Startled/shy response when
+                                           clicked or petted
+  FOLLOW           Walk     10 sec         Tracks cursor position in
+                                           real time
+  LAUGH            3        3–5 sec        Happy-eyes, wide mouth,
+                                           animated teardrops
+  JUMP             4        3–5 sec        Squash-and-stretch vertical
+                                           hop with Y offset
+  ROLL             4        4–7 sec        Full 360° tumble rotation
+  WOOLBALL          —       5–8 sec        Bouncing yarn ball physics
+                                           simulation
+  CHEER             —       3–5 sec        Confetti particle burst that
+                                           trickles down
+  LOVE             3        4–6 sec        Heart-shaped eyes, blush
+                                           cheeks, floating hearts
+
+  The BehaviorMachine uses weighted randomness to pick the next
+  activity after each idle period. The probability distribution
+  ensures variety — the cat won't repeat the same action too often.
+
+  If the cat is idle for 30–60 seconds with no user interaction,
+  it automatically falls asleep.
+
+
+  5.2  MULTI-MONITOR NAVIGATION
+  ────────────────────────────────────────
+
+  Luna is aware of all connected displays and can walk seamlessly
+  between them.
+
+  Key functions:
+    * ScreenRect         — Represents a single display's bounds
+    * ScreenNavigator    — Handles pathfinding across displays
+    * pickTarget()       — Selects a random point on any display
+    * step()             — Advances position toward target by
+                           speed, handling diagonal movement
+    * adjacentScreen()   — Detects neighboring displays within
+                           a 4px tolerance for seamless crossing
+
+  Edge behavior:
+    * At a display boundary with an adjacent screen → cross over
+    * At a display boundary with no neighbor → stop and turn around
+    * Vertical edges → clamp to stay fully on-screen
+
+
+  5.3  WATER HYDRATION REMINDER SYSTEM
+  ────────────────────────────────────────
+
+  The hydration system is Luna's core wellness feature.
+
+  How it works:
+    1. A configurable timer fires at the user's chosen interval
+       (1, 15, 30, 45, or 60 minutes).
+    2. Luna sprints to the CENTER of the primary display at 2.5×
+       normal walk speed ("Hydration Sprint").
+    3. The DRINK animation plays — Luna picks up a water bottle.
+    4. A speech bubble appears with one of 10 randomized messages
+       (e.g., "💧 Stay hydrated, human!", "💧 Hydrate or dry-rate!").
+    5. The bubble persists with a red "×" close button until the
+       user manually dismisses it.
+    6. When dismissed, Luna immediately sprints away to a random
+       location ("Dismiss Sprint").
+
+  Key design decisions:
+    * No random meows or purrs — reminders are ONLY water-focused.
+    * The alert does NOT auto-dismiss — this forces acknowledgment.
+    * The sprint-to-center guarantees the user sees the reminder
+      regardless of where Luna was on screen.
+
+  Related functions:
+    * triggerWaterHydrationFlow()   — Begins the sprint sequence
+    * triggerWaterReminderBubble()  — Shows the speech bubble
+    * closeSpeechBubble()          — Dismisses and triggers run
+    * WaterReminderManager (macOS) — Manages timer and settings
+
+
+  5.4  CLICK-THROUGH TRANSPARENCY
+  ────────────────────────────────────────
+
+  Luna's window is fully transparent and borderless. The key
+  technical challenge: the user must be able to click THROUGH
+  the transparent parts of the window to interact with apps
+  underneath, while still being able to click ON the cat itself.
+
+  Solution:
+    * Per-pixel alpha hit testing on every mouse move
+    * If the pixel under the cursor has alpha < 8 → ignore mouse
+      (pass through to apps below)
+    * If the pixel has alpha >= 8 → the cat is under the cursor,
+      capture the event
+    * On Windows (Electron): uses setIgnoreMouseEvents(true/false)
+    * On macOS: uses NSWindow's ignoresMouseEvents with alpha
+      sampling from the SpriteKit scene
+
+
+  5.5  DRAG & DROP INTERACTION
+  ────────────────────────────────────────
+
+  Users can pick up Luna and drag her anywhere on screen.
+
+  Implementation:
+    * mousedown on the cat → records offset between cursor and
+      cat position, enters REACT state
+    * mousemove while dragging → updates position in real time
+    * mouseup → drops the cat at current position (no snap-back)
+    * Dragged position is clamped to the active monitor bounds
+    * On Windows: uses Electron IPC for global cursor tracking
+    * On macOS: handled natively via SpriteKit mouse events
+
+
+  5.6  SPEECH BUBBLE SYSTEM
+  ────────────────────────────────────────
+
+  Luna can "speak" through pixel-art-styled speech bubbles that
+  appear above her head.
+
+  Bubble types:
+    * Water Reminders  — Persistent, with red close button
+    * Cat Voices       — Auto-dismiss after 3 seconds
+    * React Voices     — Shown when petted, 3 seconds
+    * Custom "Say"     — Triggered from menu, 4 seconds
+
+  Water reminder messages (10 total):
+    "💧 Stay hydrated, human!"
+    "💧 Glug glug! Water time!"
+    "💧 Drink water now!"
+    "💧 Keep your batteries full!"
+    "💧 Hydrate or dry-rate!"
+    "💧 Be like a plant: water!"
+    "💧 System alert: Drink water!"
+    "💧 Take a sip of water!"
+    "💧 Hydration check!"
+    "💧 Drink up!"
+
+
+  5.7  PROCEDURAL SPRITE GENERATION
+  ────────────────────────────────────────
+
+  All of Luna's animation frames are generated procedurally from a
+  single base SVG file (Cat.svg) using the generate_frames.js script.
+
+  The system:
+    * Parses the base Cat.svg into body paths, tail backing, and
+      tail highlight layers
+    * Applies per-frame transforms: translate, rotate, scale
+    * Generates overlays for expressions:
+        - Closed eyes (sleep blink arcs)
+        - Happy eyes (upward arcs)
+        - Heart eyes (SVG heart paths for LOVE state)
+        - Blush cheeks (pink circles)
+        - Laughing mouth (wide/medium open mouth)
+        - Teardrops (small/medium/large for laugh animation)
+        - Water bottle (positioned/rotated per drink frame)
+    * Outputs 38+ SVG frame files across 13 animation directories
+    * Frames are written to BOTH Windows and macOS asset folders
+
+  This means Luna requires NO heavy image files — all art is
+  vector-based and procedurally composed.
+
+
+  5.8  CELEBRATION EFFECTS (macOS)
+  ────────────────────────────────────────
+
+  The macOS version includes SpriteKit particle effects:
+
+    * CONFETTI (Cheer state) — Colorful rectangular confetti pieces
+      burst upward, then fall with gravity, bounce off walls, and
+      fade out. Uses 7 vibrant colors. A gentle trickle continues
+      while the cheer state is active.
+
+    * HEARTS (Love state) — ❤️ emojis drift upward with a sine-wave
+      wobble, clamped to window bounds, fading over 1–2 seconds.
+
+    * WOOL BALL (Woolball state) — An orange ball bounces around the
+      window with simple physics (gravity, wall collisions, damping).
+      The cat faces toward the ball while playing with it.
+
+
+  5.9  SYSTEM TRAY / MENU BAR
+  ────────────────────────────────────────
+
+  Both platforms provide system-level controls:
+
+  macOS (Menu Bar 🐱 icon):
+    * Toggle Prevent Sleep (on/off)
+    * Toggle Water Reminders (on/off)
+    * Set Hydration Interval
+    * Toggle Start at Login
+    * Idle (Park) / Poke
+    * Say
+    * Movements submenu (all 13 states)
+    * Quit Luna
+
+  Windows (Right-click context menu):
+    * Same options as macOS
+    * Opens a styled Control Panel window for settings
+
+
+  5.10  SLEEP PREVENTION
+  ────────────────────────────────────────
+
+  Luna can optionally prevent the computer from sleeping.
+
+    * macOS: Uses NSProcessInfo activity assertion with
+      idleSystemSleepDisabled
+    * Windows: Uses Electron's powerSaveBlocker API with
+      "prevent-display-sleep" mode
+
+
+  5.11  AUTO-START AT LOGIN
+  ────────────────────────────────────────
+
+  Luna can be configured to launch automatically at system startup.
+
+    * macOS: Uses SMLoginItemSetEnabled / Launch Services
+    * Windows: Uses Electron's setLoginItemSettings API to register
+      the app's exe path in the Windows Registry
+
+  Safety checks:
+    * Both platforms detect if the app is running from a temporary
+      directory (ZIP extraction, mounted DMG) and warn the user that
+      auto-start will break after a restart.
+    * Windows dev mode: does NOT register startup entries to avoid
+      polluting the Registry with development paths.
+
+
+  5.12  SETTINGS PERSISTENCE
+  ────────────────────────────────────────
+
+  User preferences are saved to disk and restored on launch.
+
+    * macOS: Uses UserDefaults via SettingsStore
+    * Windows: JSON file at %APPDATA%/Luna/settings.json
+
+  Persisted settings:
+    - sleepPrevention (bool)
+    - waterReminders (bool)
+    - waterIntervalMinutes (int)
+    - autoStart (bool)
+    - isParked (bool)
+
+
+  5.13  PARKING / IDLE MODE
+  ────────────────────────────────────────
+
+  If Luna gets in your way, you can "park" her:
+
+    * Select "Idle (Park)" from the menu
+    * Luna walks to a quiet spot and sits still
+    * No walking, running, following, or sleeping while parked
+    * Select "Poke" to wake her up and resume normal behavior
+
+
+  5.14  CUSTOM SPRITE SUPPORT
+  ────────────────────────────────────────
+
+  Users can replace Luna's default art with their own custom sprites:
+
+    * macOS: Place frames at ~/Library/Application Support/
+      DesktopPet/Sprites/ in subdirectories
+    * Windows: Replace frames in the local artwork/ folder
+
+  Supported animation directories:
+    idle/, walk/, sleep/, drink/, play/, react/, follow/,
+    laugh/, jump/, run/, roll/, woolball/, cheer/, love/
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                  6. FILE STRUCTURE OVERVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Root/
+  ├── Package.swift                  Swift package manifest
+  ├── Makefile                       Build shortcuts
+  ├── README.md                      GitHub-facing documentation
+  ├── Pet model/Cat.svg              Base vector art model
+  │
+  ├── Sources/DesktopPet/            macOS Swift source code
+  │   ├── main.swift                 Entry point
+  │   ├── AppDelegate.swift          App lifecycle & setup
+  │   ├── PetWindowController.swift  Window management & behavior
+  │   ├── PetScene.swift             SpriteKit rendering & effects
+  │   ├── PetSprite.swift            Sprite animation playback
+  │   ├── PetWindow.swift            Transparent NSWindow config
+  │   ├── SpriteSource.swift         Texture loading (SVG/PNG)
+  │   ├── Navigation/                Screen navigation logic
+  │   └── Services/
+  │       ├── AutoStartManager.swift     Login item management
+  │       ├── SettingsStore.swift         UserDefaults persistence
+  │       ├── SleepPreventer.swift        System sleep blocker
+  │       ├── StatusItemController.swift  Menu bar tray UI
+  │       └── WaterReminderManager.swift  Hydration timer logic
+  │
+  ├── desktop/                       Cross-Platform Electron source code (Windows & Linux)
+  │   ├── main.js                    Electron main process
+  │   ├── index.html                 Pet UI & control panel
+  │   ├── app.js                     Renderer: animation & logic
+  │   ├── behavior.js                BehaviorMachine state engine
+  │   ├── style.css                  Styling for UI elements
+  │   ├── generate_frames.js         Procedural SVG frame builder
+  │   ├── package.json               npm dependencies & scripts
+  │   └── artwork/                   Generated SVG animation frames
+  │
+  ├── Resources/                     Shared resources
+  │   ├── Info.plist                 macOS app metadata
+  │   └── Artwork/                   Generated macOS sprite frames
+  │
+  ├── Tests/                         Unit tests
+  └── scripts/                       Build & packaging scripts
+      ├── build_app.sh               Create .app bundle
+      └── make_dmg.sh                Create DMG installer
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               7. PRIVACY & PERFORMANCE PHILOSOPHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  * FULLY OFFLINE — Luna makes ZERO external network requests. No
+    telemetry. No analytics. No tracking. No cloud sync. Everything
+    runs locally on your machine.
+
+  * ULTRA-LIGHTWEIGHT — Extremely low CPU and memory footprint on
+    both platforms. The SVG-based sprite system means no large image
+    assets are bundled or loaded into memory.
+
+  * NO SOUND — Luna is intentionally silent. No audio files, no
+    system sounds. All communication is visual (speech bubbles and
+    animations). This makes it suitable for office environments
+    and shared spaces.
+
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                       8. IN SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Luna is a small application with a big heart.
+
+It solves the problem of sterile desktop environments and forgotten
+hydration by providing a living, interactive companion that is
+charming enough to notice and gentle enough to never get in the way.
+
+Every function — from the weighted random behavior engine to the
+per-pixel transparency hit testing to the procedural SVG sprite
+system — is designed to make one tiny cat feel alive on your screen.
+
+And that is the entire point.
+
+
+========================================================================
+              🐱 Thank you for reading about Luna.
+========================================================================

@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Luna Mobile</string>
+    <string name="title_permissions">Permissions Setup</string>
+    <string name="status_granted">Granted</string>
+    <string name="status_missing">Missing (Tap to setup)</string>
+    <string name="perm_overlay_title">Draw Over Other Apps</string>
+    <string name="perm_overlay_desc">Allows Luna to float on your screen while you use other apps.</string>
+    <string name="perm_usage_title">Usage Access Stats</string>
+    <string name="perm_usage_desc">Allows Luna to notice which app is open and react to usage habits.</string>
+    <string name="btn_start">Start Luna 🐱</string>
+    <string name="btn_stop">Stop Luna 💤</string>
+    <string name="service_notification_title">Luna is on screen</string>
+    <string name="service_notification_desc">Luna is keeping you company and checking hydration/screentime.</string>
+</resources>

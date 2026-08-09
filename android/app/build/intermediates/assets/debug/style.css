@@ -1,0 +1,70 @@
+#petContainer {
+  position: absolute;
+  width: 200px;
+  height: 220px;
+  left: 0;
+  top: 0;
+  background: transparent;
+}
+
+canvas {
+  position: absolute;
+  left: 36px;
+  bottom: 0;
+  width: 128px;
+  height: 120px;
+  background: transparent;
+}
+
+#speechBubble {
+  display: none;
+  position: absolute;
+  background: #fffff0;
+  color: #010101;
+  border: 3px solid #010101;
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 11px;
+  width: 140px;
+  box-shadow: 3px 3px 0px #010101;
+  z-index: 1000;
+  text-align: center;
+  white-space: normal;
+  word-wrap: break-word;
+  pointer-events: none;
+  left: 36px; /* Aligns left edge of bubble with left screen border (cat canvas starts at 36px) */
+  bottom: 128px; /* Positioned above the 120px tall canvas */
+}
+
+#speechBubbleClose {
+  display: none !important; /* Completely hidden as per request */
+}
+
+#speechBubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 8px 0;
+  border-style: solid;
+  border-color: #fffff0 transparent transparent;
+  display: block;
+  width: 0;
+}
+
+#speechBubble::before {
+  content: '';
+  position: absolute;
+  bottom: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 12px 10px 0;
+  border-style: solid;
+  border-color: #010101 transparent transparent;
+  display: block;
+  width: 0;
+  z-index: -1;
+}

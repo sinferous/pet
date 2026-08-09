@@ -1,0 +1,132 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.webtree.desktoppet"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="33" />
+10
+11    <!-- Allows drawing floating windows over other apps -->
+12    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+12-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:7:5-78
+12-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:7:22-75
+13
+14    <!-- Required for vibration/haptics -->
+15    <uses-permission android:name="android.permission.VIBRATE" />
+15-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:10:5-66
+15-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:10:22-63
+16
+17    <!-- Allows checking package usage stats to detect opened apps -->
+18    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+18-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:13:5-15:47
+18-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:14:9-62
+19
+20    <!-- Required for background services on Android 9+ -->
+21    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+21-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:18:5-77
+21-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:18:22-74
+22
+23    <!-- Optional: restart Luna after system reboot -->
+24    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+24-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:21:5-81
+24-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:21:22-78
+25
+26    <permission
+26-->[androidx.core:core:1.9.0] C:\Users\v1she\.gradle\caches\transforms-3\5a317505199c188d7fc237202ba7e31f\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
+27        android:name="com.webtree.desktoppet.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+27-->[androidx.core:core:1.9.0] C:\Users\v1she\.gradle\caches\transforms-3\5a317505199c188d7fc237202ba7e31f\transformed\core-1.9.0\AndroidManifest.xml:23:9-81
+28        android:protectionLevel="signature" />
+28-->[androidx.core:core:1.9.0] C:\Users\v1she\.gradle\caches\transforms-3\5a317505199c188d7fc237202ba7e31f\transformed\core-1.9.0\AndroidManifest.xml:24:9-44
+29
+30    <uses-permission android:name="com.webtree.desktoppet.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+30-->[androidx.core:core:1.9.0] C:\Users\v1she\.gradle\caches\transforms-3\5a317505199c188d7fc237202ba7e31f\transformed\core-1.9.0\AndroidManifest.xml:26:5-97
+30-->[androidx.core:core:1.9.0] C:\Users\v1she\.gradle\caches\transforms-3\5a317505199c188d7fc237202ba7e31f\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
+31
+32    <application
+32-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:23:5-54:19
+33        android:allowBackup="true"
+33-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:24:9-35
+34        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+34-->[androidx.core:core:1.9.0] C:\Users\v1she\.gradle\caches\transforms-3\5a317505199c188d7fc237202ba7e31f\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
+35        android:debuggable="true"
+36        android:extractNativeLibs="false"
+37        android:icon="@mipmap/ic_launcher"
+37-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:25:9-43
+38        android:label="@string/app_name"
+38-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:27:9-41
+39        android:roundIcon="@mipmap/ic_launcher_round"
+39-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:26:9-54
+40        android:supportsRtl="true"
+40-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:28:9-35
+41        android:testOnly="true"
+42        android:theme="@style/Theme.LunaMobile" >
+42-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:29:9-48
+43        <activity
+43-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:31:9-38:20
+44            android:name="com.webtree.desktoppet.MainActivity"
+44-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:32:13-41
+45            android:exported="true" >
+45-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:33:13-36
+46            <intent-filter>
+46-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:34:13-37:29
+47                <action android:name="android.intent.action.MAIN" />
+47-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:35:17-69
+47-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:35:25-66
+48
+49                <category android:name="android.intent.category.LAUNCHER" />
+49-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:36:17-77
+49-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:36:27-74
+50            </intent-filter>
+51        </activity>
+52
+53        <service
+53-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:40:9-43:40
+54            android:name="com.webtree.desktoppet.FloatingPetService"
+54-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:41:13-47
+55            android:enabled="true"
+55-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:42:13-35
+56            android:exported="false" />
+56-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:43:13-37
+57
+58        <receiver
+58-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:45:9-52:20
+59            android:name="com.webtree.desktoppet.BootReceiver"
+59-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:46:13-41
+60            android:enabled="true"
+60-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:47:13-35
+61            android:exported="false" >
+61-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:48:13-37
+62            <intent-filter>
+62-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:49:13-51:29
+63                <action android:name="android.intent.action.BOOT_COMPLETED" />
+63-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:50:17-79
+63-->J:\Work\Webtree Online\Desktop pet\android\app\src\main\AndroidManifest.xml:50:25-76
+64            </intent-filter>
+65        </receiver>
+66
+67        <provider
+67-->[androidx.emoji2:emoji2:1.2.0] C:\Users\v1she\.gradle\caches\transforms-3\fab8b75b7e9679982a94051180e1a35f\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+68            android:name="androidx.startup.InitializationProvider"
+68-->[androidx.emoji2:emoji2:1.2.0] C:\Users\v1she\.gradle\caches\transforms-3\fab8b75b7e9679982a94051180e1a35f\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
+69            android:authorities="com.webtree.desktoppet.androidx-startup"
+69-->[androidx.emoji2:emoji2:1.2.0] C:\Users\v1she\.gradle\caches\transforms-3\fab8b75b7e9679982a94051180e1a35f\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
+70            android:exported="false" >
+70-->[androidx.emoji2:emoji2:1.2.0] C:\Users\v1she\.gradle\caches\transforms-3\fab8b75b7e9679982a94051180e1a35f\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
+71            <meta-data
+71-->[androidx.emoji2:emoji2:1.2.0] C:\Users\v1she\.gradle\caches\transforms-3\fab8b75b7e9679982a94051180e1a35f\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+72                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+72-->[androidx.emoji2:emoji2:1.2.0] C:\Users\v1she\.gradle\caches\transforms-3\fab8b75b7e9679982a94051180e1a35f\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+73                android:value="androidx.startup" />
+73-->[androidx.emoji2:emoji2:1.2.0] C:\Users\v1she\.gradle\caches\transforms-3\fab8b75b7e9679982a94051180e1a35f\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+74            <meta-data
+74-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\v1she\.gradle\caches\transforms-3\57511ff2d720ed9fbde6c9dd4e8889d3\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:31:13-33:52
+75                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+75-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\v1she\.gradle\caches\transforms-3\57511ff2d720ed9fbde6c9dd4e8889d3\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:32:17-78
+76                android:value="androidx.startup" />
+76-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\v1she\.gradle\caches\transforms-3\57511ff2d720ed9fbde6c9dd4e8889d3\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:33:17-49
+77        </provider>
+78    </application>
+79
+80</manifest>

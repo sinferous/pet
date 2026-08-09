@@ -16,6 +16,6 @@ DerivedData/
 # Editor/OS noise
 Thumbs.db
 
-# Browser-preview / Windows Electron source
-windows/node_modules/
-windows/dist/
+# Browser-preview / Desktop Electron source
+desktop/node_modules/
+desktop/dist/

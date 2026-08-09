@@ -1,12 +1,12 @@
-# 🐱 Luna (macOS & Windows)
+# 🐱 Luna (macOS, Windows & Linux)
 
 A cute pixel-art companion that lives on your desktop! It walks across your screens, plays, sleeps, follows your cursor, and keeps you hydrated with custom reminders.
 
 Published by **sinferous** 🐾
 
-![Platform Support](https://img.shields.io/badge/OS-macOS%20%7C%20Windows-blue?style=for-the-badge)
+![Platform Support](https://img.shields.io/badge/OS-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange?style=for-the-badge)
-![Electron](https://img.shields.io/badge/Electron-31.0-green?style=for-the-badge)
+![Electron](https://img.shields.io/badge/Electron-32.0-green?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)
 
 ---
@@ -49,18 +49,32 @@ A 🐱 tray icon in the system menu bar allows you to:
 
 ---
 
-### 2. Windows Version (Electron + HTML5 Canvas)
-A smooth, custom-designed Windows companion built on Electron and web technology.
+### 2. Desktop Version (Windows & Linux/Ubuntu)
+A smooth, custom-designed companion built on Electron and web technology.
 
 #### Installation
+
+**Windows:**
 1. Go to **Releases** and download the Windows setup installer (`Luna Setup 1.0.0.exe`).
 2. Run the installer to install the application.
    > [!IMPORTANT]
    > You must run the setup installer to install Luna. Do not run the application directly from a temporary folder or zip extraction folder, as Windows clears temporary directories on system restart, which will break the "Start at Login" functionality.
 3. Launch `Luna`.
 
+**Linux (Ubuntu):**
+1. Download either the `.deb` package (`luna_1.0.0_amd64.deb`) or the standalone AppImage (`Luna-1.0.0.AppImage`).
+2. For the `.deb` package, install via apt or your package manager:
+   ```bash
+   sudo dpkg -i luna_1.0.0_amd64.deb
+   ```
+3. For the AppImage, make it executable and run it:
+   ```bash
+   chmod +x Luna-1.0.0.AppImage
+   ./Luna-1.0.0.AppImage
+   ```
+
 #### Controls & Control Panel
-Right-click the cat on Windows to open the context menu:
+Right-click the cat to open the context menu:
 - **Control Panel**: Opens the beautiful control panel to configure behavior, preview custom intervals, and trigger actions.
 - **Start at Login**: Launch at system startup.
 - **Close Speech Bubble**: Manually dismiss alerts.
@@ -99,17 +113,23 @@ bash scripts/build_app.sh
 bash scripts/make_dmg.sh
 ```
 
-### Windows Build Instructions
+### Desktop Build Instructions (Windows & Linux)
 Requires **Node.js** and **npm**.
 ```bash
+# Navigate to desktop
+cd desktop
+
 # Install dependencies
 npm install
 
 # Start in development mode
 npm start
 
-# Package for distribution (Windows exe)
-npm run package
+# Package for Windows distribution (exe)
+npm run dist
+
+# Package for Linux distribution (AppImage & deb)
+npm run dist:linux
 ```
 
 ---
