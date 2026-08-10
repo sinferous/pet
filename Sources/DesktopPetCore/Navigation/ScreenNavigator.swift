@@ -101,7 +101,7 @@ public enum ScreenNavigator {
 
         if x <= screen.minX {
             if let next = adjacentScreen(to: .left, of: screen, screens: screens) {
-                x = next.maxX - width
+                x = next.maxX - width - 0.1
                 crossed = true
             } else {
                 x = screen.minX + 0.1
