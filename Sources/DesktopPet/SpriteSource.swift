@@ -136,7 +136,33 @@ enum SpriteSource {
     private static func cgImageFromSVG(at url: URL, targetSize: CGSize) -> CGImage? {
         guard let image = NSImage(contentsOf: url) else { return nil }
         image.size = targetSize
-        var rect = NSRect(origin: .zero, size: targetSize)
-        return image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
+        
+        let width = Int(targetSize.width)
+        let height = Int(targetSize.height)
+        
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(
+                  data: nil,
+                  width: width,
+                  height: height,
+                  bitsPerComponent: 8,
+                  bytesPerRow: width * 4,
+                  space: colorSpace,
+                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+              ) else {
+            return nil
+        }
+        
+        let prevContext = NSGraphicsContext.current
+        let graphicsContext = NSGraphicsContext(cgContext: context, flipped: false)
+        NSGraphicsContext.current = graphicsContext
+        
+        image.draw(in: NSRect(origin: .zero, size: targetSize),
+                   from: .zero,
+                   operation: .sourceOver,
+                   fraction: 1.0)
+        
+        NSGraphicsContext.current = prevContext
+        return context.makeImage()
     }
 }
