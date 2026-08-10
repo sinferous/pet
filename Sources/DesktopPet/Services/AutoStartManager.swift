@@ -9,37 +9,47 @@ final class AutoStartManager {
 
     /// Whether the app is currently registered as a login item.
     var isEnabled: Bool {
-        if #available(macOS 13.0, *) {
-            return SMAppService.mainApp.status == .enabled
-        }
         return launchAgentExists()
     }
 
     func enable() {
-        if #available(macOS 13.0, *) {
+        // Copy the currently running app bundle to a permanent location under Application Support.
+        // This ensures autostart works reliably even if the app was run from a temporary translocated path or DMG.
+        if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            let destFolder = appSupport.appendingPathComponent("DesktopPet", isDirectory: true)
+            let destAppURL = destFolder.appendingPathComponent("Luna.app")
+            
             do {
-                try SMAppService.mainApp.register()
+                try FileManager.default.createDirectory(at: destFolder, withIntermediateDirectories: true)
+                if FileManager.default.fileExists(atPath: destAppURL.path) {
+                    try FileManager.default.removeItem(at: destAppURL)
+                }
+                try FileManager.default.copyItem(at: Bundle.main.bundleURL, to: destAppURL)
+                print("[AutoStart] Successfully copied app bundle to permanent location: \(destAppURL.path)")
+                installLaunchAgent(for: destAppURL)
                 return
             } catch {
-                print("[AutoStart] SMAppService.register failed: \(error), falling back to LaunchAgent")
+                print("[AutoStart] Failed to copy app bundle: \(error), attempting direct registration")
             }
         }
-        installLaunchAgent()
+        
+        // Fallback: register the currently running app bundle directly
+        installLaunchAgent(for: Bundle.main.bundleURL)
     }
 
     func disable() {
-        if #available(macOS 13.0, *) {
-            do {
-                try SMAppService.mainApp.unregister()
-                return
-            } catch {
-                print("[AutoStart] SMAppService.unregister failed: \(error)")
+        removeLaunchAgent()
+        
+        // Clean up the copied app bundle if it exists
+        if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            let destAppURL = appSupport.appendingPathComponent("DesktopPet/Luna.app")
+            if FileManager.default.fileExists(atPath: destAppURL.path) {
+                try? FileManager.default.removeItem(at: destAppURL)
             }
         }
-        removeLaunchAgent()
     }
 
-    // MARK: - LaunchAgent fallback
+    // MARK: - LaunchAgent management
 
     private static let agentID = "com.desktop-pet.autostart"
     private var agentURL: URL {
@@ -51,11 +61,10 @@ final class AutoStartManager {
         FileManager.default.fileExists(atPath: agentURL.path)
     }
 
-    private func installLaunchAgent() {
-        let exe = Bundle.main.executableURL?.path ?? ProcessInfo.processInfo.arguments[0]
+    private func installLaunchAgent(for appURL: URL) {
         let plist: [String: Any] = [
             "Label": Self.agentID,
-            "ProgramArguments": [exe],
+            "ProgramArguments": ["/usr/bin/open", appURL.path],
             "RunAtLoad": true,
             "KeepAlive": false
         ]

@@ -32,11 +32,20 @@ final class PetSKView: SKView {
     override func hitTest(_ point: NSPoint) -> NSView? {
         if let scene = self.scene {
             let scenePt = convert(point, to: scene)
-            if let closeNode = scene.childNode(withName: "//closeButton"),
-               closeNode.contains(scenePt) {
+            let nodes = scene.nodes(at: scenePt)
+            if nodes.contains(where: { $0.name == "closeButton" || $0.parent?.name == "closeButton" }) {
                 return super.hitTest(point)
             }
         }
+        
+        // Disable click-through when the left mouse button is held down.
+        // This ensures mouse drag events are not lost when the cursor slides
+        // over transparent pixels of the window during active dragging.
+        let leftMouseDown = (NSEvent.pressedMouseButtons & 1) != 0
+        if leftMouseDown {
+            return super.hitTest(point)
+        }
+
         if let alpha = alphaProvider?(point), alpha < 8 {
             return nil // click falls through
         }

@@ -26,6 +26,7 @@ public final class BehaviorMachine {
 
     private var nextDecisionTime: TimeInterval = 0
     private var nextSleepTime: TimeInterval = 0
+    private var lastWalkTime: TimeInterval = 0
     private var stateUntil: TimeInterval = 0
     private var walkDeadline: TimeInterval = 0
     private var runDeadline: TimeInterval = 0
@@ -50,6 +51,7 @@ public final class BehaviorMachine {
         let t = clock()
         nextDecisionTime = t + idleDecisionDelay()
         nextSleepTime = t + sleepAfterIdle()
+        lastWalkTime = t
     }
 
     // MARK: - External events
@@ -124,6 +126,12 @@ public final class BehaviorMachine {
     public func tick() {
         let t = clock()
         if parked { return } // parked: no activity decisions, no sleep, stays idle
+
+        // Force the cat to walk to a new location if 30 seconds have elapsed since the last walk/run started.
+        if state != .walk && state != .run && state != .drink && (t - lastWalkTime) >= 30.0 {
+            enter(.walk)
+            return
+        }
 
         // Finite-duration states expire.
         switch state {
@@ -228,8 +236,10 @@ public final class BehaviorMachine {
         case .jump:
             stateUntil = t + .random(in: 3...5)
         case .walk:
+            lastWalkTime = t
             walkDeadline = t + .random(in: 10...25)
         case .run:
+            lastWalkTime = t
             runDeadline = t + .random(in: 5...15)
         case .roll:
             rollDeadline = t + .random(in: 4...7)

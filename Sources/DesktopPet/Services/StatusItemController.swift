@@ -228,6 +228,12 @@ final class StatusItemController {
         NSApplication.shared.terminate(nil)
     }
 
+    func showMenuAtCursor() {
+        if let menu = statusItem.menu {
+            menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        }
+    }
+
     // MARK: - Helpers
 
     private func refreshCheckmarks() {

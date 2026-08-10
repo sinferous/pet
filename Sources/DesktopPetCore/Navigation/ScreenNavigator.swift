@@ -48,54 +48,72 @@ public enum ScreenNavigator {
     public static let adjacencyTolerance: Double = 4.0
 
     /// Picks a random reachable target on a random screen, inset from the edges.
-    public static func pickTarget(screens: [ScreenRect], margin: Double = 40) -> WalkTarget? {
+    public static func pickTarget(screens: [ScreenRect],
+                                  margin: Double = 40,
+                                  winWidth: Double = 256,
+                                  petHeight: Double = 120) -> WalkTarget? {
         guard !screens.isEmpty else { return nil }
         let index = Int.random(in: 0..<screens.count)
         let screen = screens[index]
-        let inset = min(margin, screen.width / 3)
-        let x: Double
-        if screen.width <= inset * 2 {
-            x = screen.centerX
-        } else {
-            x = Double.random(in: (screen.minX + inset)...(screen.maxX - inset))
-        }
-        return WalkTarget(screenIndex: index, x: x, y: screen.minY)
+        
+        let insetX = min(margin, screen.width / 4)
+        let insetY = min(margin, screen.height / 4)
+        
+        let rangeX = screen.width - insetX * 2 - winWidth
+        let rangeY = screen.height - insetY * 2 - petHeight
+        
+        let x = rangeX > 0 ? screen.minX + insetX + Double.random(in: 0...rangeX) : screen.centerX
+        let y = rangeY > 0 ? screen.minY + insetY + Double.random(in: 0...rangeY) : screen.minY
+        
+        return WalkTarget(screenIndex: index, x: x, y: y)
     }
 
-    /// Advances `x` by `speed` in `facing`'s direction, crossing to an adjacent
+    /// Advances `x` and `y` towards target coordinates by `speed`, crossing to an adjacent
     /// screen at the edge, or turning around when there is none.
     public static func step(currentX: Double,
                             currentY: Double,
+                            targetX: Double,
+                            targetY: Double,
                             facing: Facing,
                             speed: Double,
                             screens: [ScreenRect],
                             width: Double = 0.0) -> WalkStep {
-        guard let screen = screens.first(where: { $0.contains(x: currentX, y: currentY) }) else {
+        guard let screen = screens.first(where: { $0.contains(x: currentX + width / 2, y: currentY) }) ??
+                           screens.first(where: { $0.contains(x: currentX, y: currentY) }) else {
             return WalkStep(x: currentX, y: currentY, facing: facing, crossedScreen: false)
         }
 
-        var x = currentX + (facing == .right ? speed : -speed)
+        let dx = targetX - currentX
+        let dy = targetY - currentY
+        let len = (dx * dx + dy * dy).squareRoot()
+        
+        var x = currentX
         var y = currentY
-        var resultFacing = facing
+        
+        if len > 0 {
+            let s = min(speed, len)
+            x += (dx / len) * s
+            y += (dy / len) * s
+        }
+        
+        var resultFacing = dx >= 0 ? Facing.right : Facing.left
         var crossed = false
 
-        if facing == .right, x >= screen.maxX - width {
-            if let next = adjacentScreen(to: .right, of: screen, screens: screens) {
-                x = next.minX
-                y = next.minY
-                crossed = true
-            } else {
-                x = screen.maxX - width - 0.1
-                resultFacing = .left
-            }
-        } else if facing == .left, x <= screen.minX {
+        if x <= screen.minX {
             if let next = adjacentScreen(to: .left, of: screen, screens: screens) {
-                x = next.maxX - width - 0.1
-                y = next.minY
+                x = next.maxX - width
                 crossed = true
             } else {
                 x = screen.minX + 0.1
                 resultFacing = .right
+            }
+        } else if x >= screen.maxX - width {
+            if let next = adjacentScreen(to: .right, of: screen, screens: screens) {
+                x = next.minX
+                crossed = true
+            } else {
+                x = screen.maxX - width - 0.1
+                resultFacing = .left
             }
         }
 

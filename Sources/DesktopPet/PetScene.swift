@@ -11,6 +11,7 @@ final class PetScene: SKScene {
     var onMouseDown: ((NSPoint) -> Void)?
     var onMouseDragged: ((NSPoint) -> Void)?
     var onMouseUp: (() -> Void)?
+    var onRightClick: (() -> Void)?
 
     // MARK: - Sizing
     /// The cat sprite is 128×120 and sits at the bottom of the (taller) window;
@@ -432,14 +433,18 @@ final class PetScene: SKScene {
 
     override func mouseDown(with event: NSEvent) {
         let scenePt = event.location(in: self)
-        if let closeNode = childNode(withName: "//closeButton"),
-           closeNode.contains(scenePt) {
+        let clickedNodes = nodes(at: scenePt)
+        if clickedNodes.contains(where: { $0.name == "closeButton" || $0.parent?.name == "closeButton" }) {
             activeSpeechBubble?.removeFromParent()
             activeSpeechBubble = nil
             onCloseSpeechBubble?()
             return
         }
         onMouseDown?(scenePt)
+    }
+
+    override func rightMouseDown(with event: NSEvent) {
+        onRightClick?()
     }
 
     override func mouseDragged(with event: NSEvent) {

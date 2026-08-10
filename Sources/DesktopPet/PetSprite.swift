@@ -102,7 +102,15 @@ final class PetSprite: SKSpriteNode {
         let bpr = cgImg.bytesPerRow
         let offset = py * bpr + px * bpp
 
-        // Alpha is the last component in RGBA.
-        return bpp >= 4 ? ptr[offset + 3] : 255
+        // Support both ARGB (alpha first) and RGBA (alpha last) layouts,
+        // as macOS SVG loading typically defaults to ARGB.
+        if bpp >= 4 {
+            let alphaInfo = cgImg.alphaInfo
+            let hasAlphaFirst = (alphaInfo == .first ||
+                                 alphaInfo == .premultipliedFirst)
+            return hasAlphaFirst ? ptr[offset] : ptr[offset + 3]
+        } else {
+            return 255
+        }
     }
 }

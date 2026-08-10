@@ -13,6 +13,9 @@ final class PetWindowController {
     private var cursorMonitor: Any?
     private var meowTimer: Timer?
 
+    // ── Right click callback ──
+    var onRightClick: (() -> Void)?
+
     // ── Walk/roll state ──
     private var facing: Facing = .right
     private var currentScreenIndex: Int = 0
@@ -75,6 +78,7 @@ final class PetWindowController {
         scene.onCloseSpeechBubble = { [weak self] in
             self?.behavior.triggerActivity(.run) // run somewhere else immediately!
         }
+        scene.onRightClick = { [weak self] in self?.onRightClick?() }
 
         // Identify the current screen index.
         let screens = ScreenAdapter.screenRects()
@@ -192,7 +196,7 @@ final class PetWindowController {
     private func startWalk() {
         let screens = ScreenAdapter.screenRects()
         guard !screens.isEmpty else { return }
-        guard let target = ScreenNavigator.pickTarget(screens: screens, margin: Double(margin)) else { return }
+        guard let target = ScreenNavigator.pickTarget(screens: screens, margin: Double(margin), winWidth: Double(winWidth), petHeight: Double(petHeight)) else { return }
         walkTarget = target
     }
 
@@ -204,9 +208,10 @@ final class PetWindowController {
         let curX = Double(window.frame.origin.x)
         let curY = Double(window.frame.origin.y)
         let step = ScreenNavigator.step(currentX: curX, currentY: curY,
-                                  facing: facing, speed: speed,
-                                  screens: screens,
-                                  width: Double(winWidth))
+                                   targetX: target.x, targetY: target.y,
+                                   facing: facing, speed: speed,
+                                   screens: screens,
+                                   width: Double(winWidth))
         facing = step.facing
         scene.setFacing(step.facing)
         window.setFrameOrigin(NSPoint(x: step.x, y: step.y))
@@ -219,7 +224,10 @@ final class PetWindowController {
         }
 
         // Arrived?
-        if abs(step.x - Double(target.x)) < speed * 2 {
+        let dx = step.x - target.x
+        let dy = step.y - target.y
+        let dist = (dx * dx + dy * dy).squareRoot()
+        if dist < speed * 1.5 {
             walkTarget = nil
             behavior.completeWalk()
         }

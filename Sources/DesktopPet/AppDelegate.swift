@@ -52,6 +52,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 petWindowController?.say()
             })
 
+        petWindowController?.onRightClick = { [weak statusItemController] in
+            statusItemController?.showMenuAtCursor()
+        }
+
         DispatchQueue.main.async { [weak self] in
             self?.checkRunningFromTemp()
         }
