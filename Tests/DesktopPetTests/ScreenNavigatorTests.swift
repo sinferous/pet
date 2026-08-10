@@ -8,26 +8,27 @@ final class ScreenNavigatorTests: XCTestCase {
 
     func testStepRightCrossesToAdjacentScreen() {
         let step = ScreenNavigator.step(currentX: 1919.5, currentY: 50,
+                                        targetX: 2500, targetY: 50,
                                         facing: .right, speed: 10,
                                         screens: [left, right])
         XCTAssertTrue(step.crossedScreen)
         XCTAssertEqual(step.x, 1920)
-        XCTAssertEqual(step.y, 0) // new screen's floor
         XCTAssertEqual(step.facing, .right)
     }
 
     func testStepLeftCrossesToAdjacentScreen() {
         let step = ScreenNavigator.step(currentX: 1920.5, currentY: 200,
+                                        targetX: 1000, targetY: 200,
                                         facing: .left, speed: 10,
                                         screens: [left, right])
         XCTAssertTrue(step.crossedScreen)
         XCTAssertEqual(step.x, 1919.9) // enters right edge of the left screen
-        XCTAssertEqual(step.y, 0)
         XCTAssertEqual(step.facing, .left)
     }
 
     func testTurnsAroundWhenNoNeighborToTheRight() {
         let step = ScreenNavigator.step(currentX: 1919.5, currentY: 100,
+                                        targetX: 2000, targetY: 100,
                                         facing: .right, speed: 10,
                                         screens: [left])
         XCTAssertFalse(step.crossedScreen)
@@ -37,6 +38,7 @@ final class ScreenNavigatorTests: XCTestCase {
 
     func testTurnsAroundWhenNoNeighborToTheLeft() {
         let step = ScreenNavigator.step(currentX: 0.5, currentY: 100,
+                                        targetX: 0, targetY: 100,
                                         facing: .left, speed: 10,
                                         screens: [left])
         XCTAssertFalse(step.crossedScreen)
@@ -47,6 +49,7 @@ final class ScreenNavigatorTests: XCTestCase {
     func testSmallGapStillCountsAsAdjacent() {
         let far = ScreenRect(minX: 1922, minY: 0, width: 1920, height: 1080)
         let step = ScreenNavigator.step(currentX: 1919.5, currentY: 50,
+                                        targetX: 2500, targetY: 50,
                                         facing: .right, speed: 10,
                                         screens: [left, far])
         XCTAssertTrue(step.crossedScreen)
@@ -56,6 +59,7 @@ final class ScreenNavigatorTests: XCTestCase {
     func testLargeGapDoesNotCross() {
         let far = ScreenRect(minX: 1930, minY: 0, width: 1920, height: 1080)
         let step = ScreenNavigator.step(currentX: 1919.5, currentY: 50,
+                                        targetX: 2500, targetY: 50,
                                         facing: .right, speed: 10,
                                         screens: [left, far])
         XCTAssertFalse(step.crossedScreen)
@@ -71,7 +75,8 @@ final class ScreenNavigatorTests: XCTestCase {
             let screen = screens[target.screenIndex]
             XCTAssertGreaterThanOrEqual(target.x, screen.minX + 40)
             XCTAssertLessThanOrEqual(target.x, screen.maxX - 40)
-            XCTAssertEqual(target.y, screen.minY)
+            XCTAssertGreaterThanOrEqual(target.y, screen.minY)
+            XCTAssertLessThanOrEqual(target.y, screen.maxY - 120) // petHeight defaults to 120
         }
     }
 
