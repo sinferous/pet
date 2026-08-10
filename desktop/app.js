@@ -309,6 +309,9 @@ window.addEventListener('mouseup', () => {
 
 window.addEventListener('contextmenu', (e) => {
   e.preventDefault();
+  if (isElectron) {
+    ipcRenderer.send('show-context-menu');
+  }
 });
 
 // Hit-testing transparency (only relevant in Electron)
@@ -339,6 +342,48 @@ function handleMouseMove(e) {
 
 if (isElectron) {
   window.addEventListener('mousemove', handleMouseMove);
+  
+  // Handle Linux global cursor polling to toggle click-through ignore shape
+  ipcRenderer.on('check-mouse-position', (event, pos) => {
+    if (isDragging) {
+      ipcRenderer.send('set-ignore-mouse-events', false);
+      return;
+    }
+    
+    if (typeof isPromptDialogOpen !== 'undefined' && isPromptDialogOpen) {
+      ipcRenderer.send('set-ignore-mouse-events', false);
+      return;
+    }
+    
+    const closeEl = document.getElementById('speechBubbleClose');
+    const hoveredEl = document.elementFromPoint(pos.x, pos.y);
+    const isOverCloseBtn = closeEl && hoveredEl && (closeEl === hoveredEl || closeEl.contains(hoveredEl));
+    
+    if (isOverCloseBtn) {
+      ipcRenderer.send('set-ignore-mouse-events', false);
+      return;
+    }
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = pos.x - rect.left;
+    const y = pos.y - rect.top;
+    
+    if (x >= 0 && x < petWidth && y >= 0 && y < petHeight) {
+      let alpha = 255;
+      try {
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        alpha = pixel[3];
+      } catch (err) {
+        if (x < 15 || x > 113 || y < headroom + 15 || y > headroom + 115) {
+          alpha = 0;
+        }
+      }
+      const ignore = alpha < 8;
+      ipcRenderer.send('set-ignore-mouse-events', ignore);
+    } else {
+      ipcRenderer.send('set-ignore-mouse-events', true);
+    }
+  });
 }
 
 const waterSentences = [

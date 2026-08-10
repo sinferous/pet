@@ -101,6 +101,31 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
+  // Linux-only global mouse polling to support transparent click-through
+  // (since { forward: true } option of setIgnoreMouseEvents is macOS/Windows only).
+  if (process.platform === 'linux') {
+    setInterval(() => {
+      if (!mainWindow || mainWindow.isDestroyed()) return;
+      const cursor = screen.getCursorScreenPoint();
+      const bounds = mainWindow.getBounds();
+      
+      const inside = (
+        cursor.x >= bounds.x &&
+        cursor.x < bounds.x + bounds.width &&
+        cursor.y >= bounds.y &&
+        cursor.y < bounds.y + bounds.height
+      );
+      
+      if (inside) {
+        const x = cursor.x - bounds.x;
+        const y = cursor.y - bounds.y;
+        mainWindow.webContents.send('check-mouse-position', { x, y });
+      } else {
+        mainWindow.setIgnoreMouseEvents(true);
+      }
+    }, 50);
+  }
+
   // Align to center of the primary screen initially
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
