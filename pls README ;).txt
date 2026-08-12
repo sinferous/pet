@@ -67,9 +67,11 @@ A small desktop pet made to bring a little life to your workspace.
   from there instead of running it directly from the mounted DMG or temporary
   folders. Running it outside Applications causes macOS path randomization
   (translocation), which will prevent the "Start at Login" feature from working).
-* FIRST LAUNCH (Gatekeeper Bypass): Right-click (or Control-click)
-  on the app in Applications, choose "Open", and click "Open" again in
-  the macOS security prompt.
+* FIRST LAUNCH (Gatekeeper Bypass): Since the app is unsigned/ad-hoc signed, macOS may block it or claim it is "damaged".
+  - Option A: Right-click (or Control-click) on the app in `/Applications`, choose "Open", and confirm.
+  - Option B: Go to **System Settings** > **Privacy & Security** and click **Open Anyway** under the security section.
+  - Option C: If you see a "damaged and can't be opened" error, clear macOS quarantine by opening Terminal and running:
+    `xattr -d com.apple.quarantine /Applications/Luna.app`
 * Click the 🐱 icon in your top menu bar to change water reminder
   settings.
 

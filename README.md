@@ -39,7 +39,13 @@ A lightweight, natively compiled Swift App utilizing AppKit and SpriteKit.
 2. Open the DMG and drag **Luna** to your **Applications** folder.
    > [!IMPORTANT]
    > You **must** drag the app to Applications and run it from there. Running it directly from the mounted DMG or a temporary folder causes macOS path randomization (App Translocation), which will break the "Start at Login" feature.
-3. **First Launch (Gatekeeper)**: Since it is an unsigned app, right-click **Luna** in Applications, select **Open**, and click **Open** in the confirmation dialog.
+3. **First Launch (Gatekeeper)**: Since it is an unsigned app, macOS may block it or say it is "damaged".
+   - **Method A (Easiest)**: Right-click **Luna** in Applications, select **Open**, and click **Open** in the confirmation dialog.
+   - **Method B (System Settings)**: If blocked, open **System Settings** > **Privacy & Security**, scroll down to the "Security" section, and click **Open Anyway**.
+   - **Method C (Terminal)**: If you see a "damaged and can't be opened" error, open Terminal and run the following command to clear macOS quarantine:
+     ```bash
+     xattr -d com.apple.quarantine /Applications/Luna.app
+     ```
 
 #### Controls & Menu bar
 A 🐱 tray icon in the system menu bar allows you to:
