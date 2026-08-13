@@ -94,6 +94,7 @@ function createWindow() {
     alwaysOnTop: true,
     skipTaskbar: true,
     hasShadow: false,
+    type: process.platform === 'linux' ? 'utility' : undefined,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false

@@ -330,7 +330,16 @@ function handleMouseMove(e) {
   }
 
   const closeEl = document.getElementById('speechBubbleClose');
-  const isOverCloseBtn = e.target === closeEl || (e.target && e.target.closest('#speechBubbleClose'));
+  let isOverCloseBtn = false;
+  if (closeEl && window.getComputedStyle(closeEl).display !== 'none') {
+    const crect = closeEl.getBoundingClientRect();
+    isOverCloseBtn = (
+      e.clientX >= crect.left &&
+      e.clientX < crect.right &&
+      e.clientY >= crect.top &&
+      e.clientY < crect.bottom
+    );
+  }
 
   if (isOverCloseBtn) {
     ipcRenderer.send('set-ignore-mouse-events', false, { forward: true });
