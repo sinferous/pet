@@ -105,11 +105,23 @@ function createWindow() {
     mainWindow.hide();
   }
 
+  let isDraggingLocal = false;
+  let isMenuOpen = false;
+
+  ipcMain.on('set-dragging', (event, dragging) => {
+    isDraggingLocal = dragging;
+    if (dragging && mainWindow) {
+      mainWindow.setIgnoreMouseEvents(false);
+    }
+  });
+
   // Linux-only global mouse polling to support transparent click-through
   // (since { forward: true } option of setIgnoreMouseEvents is macOS/Windows only).
   if (process.platform === 'linux') {
     setInterval(() => {
       if (!mainWindow || mainWindow.isDestroyed()) return;
+      if (isDraggingLocal || isMenuOpen) return;
+
       const cursor = screen.getCursorScreenPoint();
       const bounds = mainWindow.getBounds();
       
@@ -166,10 +178,19 @@ function createWindow() {
   });
 
   ipcMain.on('show-context-menu', (event) => {
+    isMenuOpen = true;
+    if (mainWindow) {
+      mainWindow.setIgnoreMouseEvents(false);
+    }
     const contextMenu = Menu.buildFromTemplate(getMenuTemplate());
     const win = BrowserWindow.fromWebContents(event.sender);
     if (win) {
-      contextMenu.popup({ window: win });
+      contextMenu.popup({
+        window: win,
+        callback: () => {
+          isMenuOpen = false;
+        }
+      });
     }
   });
 

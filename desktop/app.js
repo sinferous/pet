@@ -250,6 +250,9 @@ container.addEventListener('mousedown', async (e) => {
 
   wasPressedOnCat = true;
   isDragging = true;
+  if (isElectron) {
+    ipcRenderer.send('set-dragging', true);
+  }
   behavior.handleDragStart();
 
   if (isElectron) {
@@ -300,6 +303,9 @@ window.addEventListener('mouseup', () => {
     behavior.handleClick();
   } else {
     isDragging = false;
+    if (isElectron) {
+      ipcRenderer.send('set-dragging', false);
+    }
     behavior.handleDragEnd();
 
     // Keep the current height instead of snapping to floor
