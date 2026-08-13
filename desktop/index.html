@@ -50,7 +50,7 @@
     </div>
     <div id="reminderDialog" style="display: none; position: absolute; top: 70px; left: -26px; width: 180px; background: #fffff0; color: #010101; border: 3px solid #010101; border-radius: 12px; padding: 12px; box-shadow: 4px 4px 0px #010101; z-index: 99999; font-family: 'Courier New', Courier, monospace; box-sizing: border-box; pointer-events: auto;">
       <label style="font-weight: bold; font-size: 11px; display: block; margin-bottom: 4px;">Time (e.g. 14:30):</label>
-      <input type="text" id="reminderTimeInput" placeholder="14:30" style="width: 100%; padding: 4px; border: 2px solid #010101; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 12px; box-sizing: border-box; margin-bottom: 8px; text-align: center; background: #ffffff;">
+      <input type="text" id="reminderTimeInput" placeholder="14:30" oninput="formatTimeInput(event)" style="width: 100%; padding: 4px; border: 2px solid #010101; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 12px; box-sizing: border-box; margin-bottom: 8px; text-align: center; background: #ffffff;">
       
       <label style="font-weight: bold; font-size: 11px; display: block; margin-bottom: 4px;">Message:</label>
       <input type="text" id="reminderMsgInput" placeholder="Reminder!" style="width: 100%; padding: 4px; border: 2px solid #010101; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 12px; box-sizing: border-box; margin-bottom: 12px; text-align: center; background: #ffffff;">
@@ -1490,6 +1490,16 @@ let customReminders = [];
 let pendingCustomReminderMessage = null;
 let isReminderDialogOpen = false;
 
+window.formatTimeInput = (e) => {
+  const input = e.target;
+  const val = input.value;
+  const lastLen = parseInt(input.getAttribute('data-last-len') || '0', 10);
+  if (val.length > lastLen && /^\d{2}$/.test(val)) {
+    input.value = val + ':';
+  }
+  input.setAttribute('data-last-len', val.length.toString());
+};
+
 window.showReminderDialog = () => {
   const dialog = document.getElementById('reminderDialog');
   const timeInput = document.getElementById('reminderTimeInput');
@@ -1503,7 +1513,14 @@ window.showReminderDialog = () => {
     if (isElectron) {
       ipcRenderer.send('set-ignore-mouse-events', false);
     }
-    if (timeInput) timeInput.focus();
+    if (timeInput) {
+      timeInput.value = '';
+      timeInput.setAttribute('data-last-len', '0');
+      timeInput.focus();
+    }
+    if (msgInput) {
+      msgInput.value = '';
+    }
   }
 };
 

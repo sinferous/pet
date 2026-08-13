@@ -2,7 +2,7 @@ import AppKit
 import UserNotifications
 import DesktopPetCore
 
-final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate, NSTextFieldDelegate {
 
     private var petWindowController: PetWindowController?
     private var statusItemController: StatusItemController?
@@ -18,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     }
     private var customReminders: [CustomReminder] = []
     private var reminderTimer: Timer?
+    private var lastTimeFieldLength = 0
 
     // MARK: - Lifecycle
 
@@ -118,6 +119,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         
         let timeField = NSTextField(frame: NSRect(x: 0, y: 35, width: 220, height: 22))
         timeField.placeholderString = "Time (e.g. 14:30)"
+        timeField.delegate = self
+        lastTimeFieldLength = 0
         
         let msgField = NSTextField(frame: NSRect(x: 0, y: 0, width: 220, height: 22))
         msgField.placeholderString = "Message"
@@ -141,6 +144,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             if !time.isEmpty && !msg.isEmpty {
                 customReminders.append(CustomReminder(time: time, message: msg, triggered: false))
             }
+        }
+    }
+
+    func controlTextDidChange(_ obj: Notification) {
+        guard let textField = obj.object as? NSTextField else { return }
+        if textField.placeholderString == "Time (e.g. 14:30)" {
+            let val = textField.stringValue
+            let currentLength = val.count
+            if currentLength > lastTimeFieldLength {
+                let pattern = "^[0-9]{2}$"
+                if val.range(of: pattern, options: .regularExpression) != nil {
+                    textField.stringValue = val + ":"
+                }
+            }
+            lastTimeFieldLength = currentLength
         }
     }
 

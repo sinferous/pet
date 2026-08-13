@@ -662,6 +662,16 @@ let customReminders = [];
 let pendingCustomReminderMessage = null;
 let isReminderDialogOpen = false;
 
+window.formatTimeInput = (e) => {
+  const input = e.target;
+  const val = input.value;
+  const lastLen = parseInt(input.getAttribute('data-last-len') || '0', 10);
+  if (val.length > lastLen && /^\d{2}$/.test(val)) {
+    input.value = val + ':';
+  }
+  input.setAttribute('data-last-len', val.length.toString());
+};
+
 window.showReminderDialog = () => {
   const dialog = document.getElementById('reminderDialog');
   const timeInput = document.getElementById('reminderTimeInput');
@@ -675,7 +685,14 @@ window.showReminderDialog = () => {
     if (isElectron) {
       ipcRenderer.send('set-ignore-mouse-events', false);
     }
-    if (timeInput) timeInput.focus();
+    if (timeInput) {
+      timeInput.value = '';
+      timeInput.setAttribute('data-last-len', '0');
+      timeInput.focus();
+    }
+    if (msgInput) {
+      msgInput.value = '';
+    }
   }
 };
 
