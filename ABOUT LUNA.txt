@@ -362,14 +362,16 @@ both macOS and Windows.
     * Toggle Prevent Sleep (on/off)
     * Toggle Water Reminders (on/off)
     * Set Hydration Interval
+    * Set Custom Reminder (set a one-time reminder time and note for today)
     * Toggle Start at Login
+    * Toggle Hide/Seek (completely hides the pet window for screen sharing)
     * Idle (Park) / Poke
     * Say
     * Movements submenu (all 13 states)
     * Quit Luna
 
-  Windows (Right-click context menu):
-    * Same options as macOS
+  Windows & Linux (System Tray icon & Right-click context menu):
+    * Same options as macOS (including Hide/Seek, Idle/Poke, and Custom Reminder)
     * Opens a styled Control Panel window for settings
 
 
@@ -415,6 +417,7 @@ both macOS and Windows.
     - waterIntervalMinutes (int)
     - autoStart (bool)
     - isParked (bool)
+    - isHidden (bool)
 
 
   5.13  PARKING / IDLE MODE
@@ -422,10 +425,11 @@ both macOS and Windows.
 
   If Luna gets in your way, you can "park" her:
 
-    * Select "Idle (Park)" from the menu
-    * Luna walks to a quiet spot and sits still
-    * No walking, running, following, or sleeping while parked
-    * Select "Poke" to wake her up and resume normal behavior
+    * Select "Idle (Park)" from the menu.
+    * Luna walks to the bottom-left corner of the primary display and sits down.
+    * No walking, running, following, or sleeping while parked.
+    * She remains parked until manually "Poked" or overridden by a water/custom reminder (which walks her back to the park position automatically upon dismissal).
+    * Select "Poke" to wake her up and resume normal wandering behavior.
 
 
   5.14  CUSTOM SPRITE SUPPORT
@@ -441,6 +445,17 @@ both macOS and Windows.
     idle/, walk/, sleep/, drink/, play/, react/, follow/,
     laugh/, jump/, run/, roll/, woolball/, cheer/, love/
 
+  5.15  CUSTOM REMINDER SYSTEM (TODAY ALARMS)
+  ────────────────────────────────────────
+
+  Users can set custom, one-time reminders with a custom time (e.g. 14:30) and message for today.
+
+  How it works:
+    1. The user selects "Set Custom Reminder..." from the menu bar or tray dropdown.
+    2. They enter a target time (24h format, e.g., 14:30) and a message note.
+    3. An internal clock monitoring loop polls the system time. When the current hour and minute match the target, it triggers the custom reminder sequence.
+    4. The pet performs a Hydration Sprint to the center of the primary monitor, sits, and shows the custom message inside a persistent bubble.
+    5. The reminder stays locked in place until the "×" close button is clicked, after which it clears itself and returns the cat to normal movement or its parked position.
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
