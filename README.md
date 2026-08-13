@@ -74,15 +74,10 @@ A smooth, custom-designed companion built on Electron and web technology.
 3. Launch `Luna`.
 
 **Linux (Ubuntu):**
-1. Download either the `.deb` package (`luna_1.5.0_amd64.deb`) or the standalone AppImage (`Luna-1.5.0.AppImage`).
-2. For the `.deb` package, install via apt or your package manager:
+1. Download the `.deb` package (`luna_1.5.0_amd64.deb`).
+2. Install via apt or your package manager:
    ```bash
    sudo dpkg -i luna_1.5.0_amd64.deb
-   ```
-3. For the AppImage, make it executable and run it:
-   ```bash
-   chmod +x Luna-1.5.0.AppImage
-   ./Luna-1.5.0.AppImage
    ```
 
 #### Controls & Control Panel

@@ -96,15 +96,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DesktopPet-linux
-          path: |
-            desktop/dist/*.AppImage
-            desktop/dist/*.deb
+          path: desktop/dist/*.deb
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            desktop/dist/*.AppImage
-            desktop/dist/*.deb
+          files: desktop/dist/*.deb
           generate_release_notes: true

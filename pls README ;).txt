@@ -94,8 +94,7 @@ Windows:
   - Select "Quit" to exit.
 
 Ubuntu (Linux):
-* Install using the Debian package ("luna_1.5.0_amd64.deb") or run the standalone package ("Luna-1.5.0.AppImage").
-  (Note: For the AppImage, right-click the file, choose "Properties" -> "Permissions", and check "Allow executing file as program", or run `chmod +x Luna-1.5.0.AppImage` from your terminal).
+* Install using the Debian package ("luna_1.5.0_amd64.deb").
 * Right-click Luna (or the tray icon) to open the context menu:
   - Select "Control Panel" to customize reminder intervals and trigger animations.
   - Select "Start at Login" to configure automatic startup.

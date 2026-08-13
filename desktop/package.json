@@ -32,7 +32,6 @@
     },
     "linux": {
       "target": [
-        "AppImage",
         "deb"
       ],
       "maintainer": "sinferous <sinferous32@gmail.com>",
