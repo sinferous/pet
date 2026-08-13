@@ -350,14 +350,20 @@ function handleMouseMove(e) {
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
-  if (x >= 0 && x < petWidth && y >= 0 && y < petHeight) {
-    const pixel = ctx.getImageData(x, y, 1, 1).data;
-    const alpha = pixel[3];
-    const ignore = alpha < 8;
-    ipcRenderer.send('set-ignore-mouse-events', ignore, { forward: true });
-  } else {
-    ipcRenderer.send('set-ignore-mouse-events', true, { forward: true });
+  let ignore = true;
+  if (x >= 10 && x < 118 && y >= 200 && y < 320) {
+    if (isElectron && process.platform === 'linux') {
+      ignore = false;
+    } else {
+      try {
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        ignore = pixel[3] < 8;
+      } catch (err) {
+        ignore = false;
+      }
+    }
   }
+  ipcRenderer.send('set-ignore-mouse-events', ignore, { forward: true });
 }
 
 if (isElectron) {

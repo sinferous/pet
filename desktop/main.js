@@ -123,7 +123,18 @@ function createWindow() {
       if (!mainWindow || mainWindow.isDestroyed()) return;
       if (isDraggingLocal || isMenuOpen) return;
 
-      const cursor = screen.getCursorScreenPoint();
+      let cursor = screen.getCursorScreenPoint();
+      
+      // On Linux, adjust cursor position if scale factor is present
+      if (process.platform === 'linux') {
+        const primaryDisplay = screen.getPrimaryDisplay();
+        const scale = primaryDisplay.scaleFactor || 1;
+        if (scale !== 1) {
+          cursor.x = Math.round(cursor.x / scale);
+          cursor.y = Math.round(cursor.y / scale);
+        }
+      }
+
       const bounds = mainWindow.getBounds();
       
       const inside = (
