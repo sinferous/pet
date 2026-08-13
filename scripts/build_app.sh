@@ -34,7 +34,11 @@ if [ -d "Resources/Artwork" ]; then
   cp -R Resources/Artwork "$RESOURCES_DIR/Artwork"
 fi
 
+echo "==> Stripping extended attributes (quarantine metadata, etc.)"
+xattr -cr "$APP_DIR"
+
 echo "==> Ad-hoc code signing"
 codesign --force --deep --sign - "$APP_DIR"
 
 echo "==> Bundle ready at $APP_DIR"
+

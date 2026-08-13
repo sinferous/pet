@@ -453,6 +453,7 @@ window.closeSpeechBubble = (event) => {
   }
   if (isWaterReminderActive) {
     isWaterReminderActive = false;
+    behavior.setParked(false);
     behavior.enter(PetState.run); // run somewhere else immediately!
   }
 };
@@ -525,7 +526,6 @@ function loop(now) {
     currentAnim = 'run';
     if (Math.hypot(windowX - hydrationWalkTarget.x, windowY - hydrationWalkTarget.y) < walkSpeed * 2.5 * 1.5) {
       hydrationWalkTarget = null;
-      behavior.setParked(false);
       behavior.enter(PetState.drink);
     }
   } else if (behavior.state === PetState.walk) {

@@ -14,6 +14,7 @@ final class StatusItemController {
     private let sayHandler: () -> Void
 
     private var isParked = false
+    private var isHidden = false
 
     private let sleepItem = NSMenuItem()
     private let waterItem = NSMenuItem()
@@ -21,7 +22,9 @@ final class StatusItemController {
     private let autoStartItem = NSMenuItem()
     private let idleItem = NSMenuItem()
     private let pokeItem = NSMenuItem()
+    private let hideSeekItem = NSMenuItem()
     private let sayItem = NSMenuItem()
+    private let hideSeekHandler: (Bool) -> Void
 
     init(settings: SettingsStore,
          sleepPreventer: SleepPreventer,
@@ -29,7 +32,8 @@ final class StatusItemController {
          waterReminder: WaterReminderManager,
          behavior: BehaviorMachine,
          parkHandler: @escaping (Bool) -> Void,
-         sayHandler: @escaping () -> Void) {
+         sayHandler: @escaping () -> Void,
+         hideSeekHandler: @escaping (Bool) -> Void) {
         self.settings = settings
         self.sleepPreventer = sleepPreventer
         self.autoStart = autoStart
@@ -37,6 +41,7 @@ final class StatusItemController {
         self.behavior = behavior
         self.parkHandler = parkHandler
         self.sayHandler = sayHandler
+        self.hideSeekHandler = hideSeekHandler
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
@@ -80,6 +85,11 @@ final class StatusItemController {
         pokeItem.target = self
         pokeItem.action = #selector(poke)
         menu.addItem(pokeItem)
+
+        hideSeekItem.title = "Hide/Seek"
+        hideSeekItem.target = self
+        hideSeekItem.action = #selector(toggleHideSeek)
+        menu.addItem(hideSeekItem)
 
         sayItem.title = "Say"
         sayItem.target = self
@@ -195,6 +205,12 @@ final class StatusItemController {
         refreshCheckmarks()
     }
 
+    @objc private func toggleHideSeek() {
+        isHidden.toggle()
+        hideSeekHandler(isHidden)
+        refreshCheckmarks()
+    }
+
     @objc private func triggerSay() {
         sayHandler()
     }
@@ -241,6 +257,7 @@ final class StatusItemController {
         waterItem.state = settings.waterReminders ? .on : .off
         autoStartItem.state = autoStart.isEnabled ? .on : .off
         idleItem.state = isParked ? .on : .off
+        hideSeekItem.state = isHidden ? .on : .off
         intervalItem.title = "Hydration Interval… (\(settings.waterIntervalMinutes) min)"
     }
 }

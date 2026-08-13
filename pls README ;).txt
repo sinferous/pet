@@ -71,42 +71,50 @@ A small desktop pet made to bring a little life to your workspace.
   - Option A: Right-click (or Control-click) on the app in `/Applications`, choose "Open", and confirm.
   - Option B: Go to **System Settings** > **Privacy & Security** and click **Open Anyway** under the security section.
   - Option C: If you see a "damaged and can't be opened" error, clear macOS quarantine by opening Terminal and running:
-    `xattr -d com.apple.quarantine /Applications/Luna.app`
-* Click the 🐱 icon in your top menu bar to change water reminder
-  settings.
+    `xattr -dr com.apple.quarantine /Applications/Luna.app`
+* Click the 🐱 icon in your top menu bar to manage settings:
+  - Toggle "Water Reminders", "Prevent Sleep", and "Start at Login".
+  - Toggle "Hide/Seek" to instantly hide or show the pet.
+  - Toggle "Idle (Park)" to park the pet in the bottom-left corner.
+  - Choose "Poke" to unpark the pet.
 
 
 2. Cross-Platform Desktop Version (Windows & Ubuntu Linux)
 -----------------------------------------------------------
 
 Windows:
-* Install the application using the setup installer ("Luna Setup 1.0.0.exe").
+* Install the application using the setup installer ("Luna Setup 1.5.0.exe").
   (Note: You MUST install the application rather than running a portable version from a zip or temporary folder, otherwise the "Start at Login" feature will fail to function after a system restart).
-* Right-click Luna to open the context menu:
+* Right-click Luna (or the tray icon) to open the context menu:
   - Select "Control Panel" to customize reminder intervals and trigger animations.
   - Select "Start at Login" to configure automatic startup.
+  - Select "Hide/Seek" to completely hide or show the pet window.
+  - Select "Idle (Park)" to send the pet to the bottom-left corner.
+  - Select "Poke" to unpark the pet.
   - Select "Quit" to exit.
 
 Ubuntu (Linux):
-* Install using the Debian package ("luna_1.0.0_amd64.deb") or run the standalone package ("Luna-1.0.0.AppImage").
-  (Note: For the AppImage, right-click the file, choose "Properties" -> "Permissions", and check "Allow executing file as program", or run `chmod +x Luna-1.0.0.AppImage` from your terminal).
-* Right-click Luna to open the context menu:
+* Install using the Debian package ("luna_1.5.0_amd64.deb") or run the standalone package ("Luna-1.5.0.AppImage").
+  (Note: For the AppImage, right-click the file, choose "Properties" -> "Permissions", and check "Allow executing file as program", or run `chmod +x Luna-1.5.0.AppImage` from your terminal).
+* Right-click Luna (or the tray icon) to open the context menu:
   - Select "Control Panel" to customize reminder intervals and trigger animations.
   - Select "Start at Login" to configure automatic startup.
+  - Select "Hide/Seek" to completely hide or show the pet window.
+  - Select "Idle (Park)" to send the pet to the bottom-left corner.
+  - Select "Poke" to unpark the pet.
   - Select "Quit" to exit.
 
 
 💡 PRO-TIP: CONTROLLING AN ANNOYING CAT
 ------------------------------------------------------------------------
 
-If Luna starts walking around too much or gets in your way, you can
-freeze her:
+If Luna gets in your way, you can easily control her visibility or location:
 
-* Select "Stay" (or "Idle (Park)") from the menu. Luna will walk to the
-  corner of the screen and sit down quietly.
+* HIDE/SEEK (MEETINGS): Select "Hide/Seek" from the tray/menu bar. Luna will completely disappear from the screen (perfect for meetings or screen sharing). Select "Hide/Seek" again to bring her back.
 
-* To get her moving again, choose the "Poke" option from the menu, and
-  Luna will get back up and resume normal movement.
+* IDLE (PARK): Select "Idle (Park)" from the menu. Luna will walk to the bottom-left corner and sit quietly. The only override is a water reminder, which will temporarily bring her to the center of the display. Once dismissed, she will automatically walk back to her park position.
+
+* POKE: Select "Poke" from the menu to wake her up from Park mode and resume normal wandering.
 
 
 🛠️ HOW TO BUILD FROM SOURCE

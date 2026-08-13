@@ -20,7 +20,8 @@ Published by **sinferous** 🐾
   - Silent meows: Reminders are purely water-focused—no noisy random meows/purrs.
 - 🏃‍♂️ **Hydration Sprint** — When it is water time, the cat runs directly to the center of your primary screen.
 - 💬 **Persistent Alert & Close Button** — The water voice bubble stays in the center of the screen until you click the red "×" button.
-- 🚀 **Dismiss Sprint** — Dismissing the water alert triggers the cat to immediately sprint away to a random location.
+- 🚀 **Dismiss Sprint** — Dismissing the water alert triggers the cat to immediately sprint away (either to a random location, or back to the bottom-left corner if it was previously in Park/Idle mode).
+- 👁️ **Hide / Seek** — Instantly hide the pet from your screens during meetings or screen sharing. Show it again whenever you click Hide/Seek on the menu bar or tray dropdown.
 - 🖱️ **Interactive Drag & Physics** — Pet or drag the cat smoothly around the screen (zero jitter on macOS and Windows).
 - 📌 **Click-Through Transparency** — Transparent borderless window. Clicking on empty areas passes straight through to apps underneath, so the pet never gets in your way.
 - 😴 **Sleep Prevention (macOS)** — Optionally keeps your computer awake while running.
@@ -44,7 +45,7 @@ A lightweight, natively compiled Swift App utilizing AppKit and SpriteKit.
    - **Method B (System Settings)**: If blocked, open **System Settings** > **Privacy & Security**, scroll down to the "Security" section, and click **Open Anyway**.
    - **Method C (Terminal)**: If you see a "damaged and can't be opened" error, open Terminal and run the following command to clear macOS quarantine:
      ```bash
-     xattr -d com.apple.quarantine /Applications/Luna.app
+     xattr -dr com.apple.quarantine /Applications/Luna.app
      ```
 
 #### Controls & Menu bar
@@ -52,6 +53,11 @@ A 🐱 tray icon in the system menu bar allows you to:
 - Toggle **Prevent Sleep** (on/off).
 - Toggle **Water Reminders** and set intervals.
 - Toggle **Start at Login**.
+- Toggle **Hide/Seek** (hides the pet from screens completely).
+- Toggle **Idle (Park)** (strolls the pet to the bottom-left corner where it remains frozen until poked).
+- **Poke** (unparks/unfreezes the pet).
+- **Say** (displays custom meow dialogs).
+- Trigger custom animations via the **Movements** submenu.
 
 ---
 
@@ -61,28 +67,31 @@ A smooth, custom-designed companion built on Electron and web technology.
 #### Installation
 
 **Windows:**
-1. Go to **Releases** and download the Windows setup installer (`Luna Setup 1.0.0.exe`).
+1. Go to **Releases** and download the Windows setup installer (`Luna Setup 1.5.0.exe`).
 2. Run the installer to install the application.
    > [!IMPORTANT]
    > You must run the setup installer to install Luna. Do not run the application directly from a temporary folder or zip extraction folder, as Windows clears temporary directories on system restart, which will break the "Start at Login" functionality.
 3. Launch `Luna`.
 
 **Linux (Ubuntu):**
-1. Download either the `.deb` package (`luna_1.0.0_amd64.deb`) or the standalone AppImage (`Luna-1.0.0.AppImage`).
+1. Download either the `.deb` package (`luna_1.5.0_amd64.deb`) or the standalone AppImage (`Luna-1.5.0.AppImage`).
 2. For the `.deb` package, install via apt or your package manager:
    ```bash
-   sudo dpkg -i luna_1.0.0_amd64.deb
+   sudo dpkg -i luna_1.5.0_amd64.deb
    ```
 3. For the AppImage, make it executable and run it:
    ```bash
-   chmod +x Luna-1.0.0.AppImage
-   ./Luna-1.0.0.AppImage
+   chmod +x Luna-1.5.0.AppImage
+   ./Luna-1.5.0.AppImage
    ```
 
 #### Controls & Control Panel
-Right-click the cat to open the context menu:
+Right-click the cat (or the tray icon) to open the context menu:
 - **Control Panel**: Opens the beautiful control panel to configure behavior, preview custom intervals, and trigger actions.
 - **Start at Login**: Launch at system startup.
+- **Hide/Seek**: Toggle pet visibility (completely hides the window).
+- **Idle (Park)**: Parks the pet at the bottom-left corner of your display.
+- **Poke**: Unfreezes the pet.
 - **Close Speech Bubble**: Manually dismiss alerts.
 - **Quit**: Exit the application.
 

@@ -38,14 +38,6 @@ final class PetSKView: SKView {
             }
         }
         
-        // Disable click-through when the left mouse button is held down.
-        // This ensures mouse drag events are not lost when the cursor slides
-        // over transparent pixels of the window during active dragging.
-        let leftMouseDown = (NSEvent.pressedMouseButtons & 1) != 0
-        if leftMouseDown {
-            return super.hitTest(point)
-        }
-
         if let alpha = alphaProvider?(point), alpha < 8 {
             return nil // click falls through
         }

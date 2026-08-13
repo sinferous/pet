@@ -1096,6 +1096,7 @@ const catVoices = [
 
 let speechTimeout = null;
 let isWaterReminderActive = false;
+let isManuallyParked = false;
 
 function showSpeechBubble(text, isWaterReminder = false) {
   const bubble = document.getElementById('speechBubble');
@@ -1136,7 +1137,12 @@ window.closeSpeechBubble = (event) => {
   }
   if (isWaterReminderActive) {
     isWaterReminderActive = false;
-    behavior.enter(PetState.run); // run somewhere else immediately!
+    if (isManuallyParked) {
+      parkPet();
+    } else {
+      behavior.setParked(false);
+      behavior.enter(PetState.run); // run somewhere else immediately!
+    }
   }
 };
 
@@ -1208,7 +1214,6 @@ function loop(now) {
     currentAnim = 'run';
     if (Math.hypot(windowX - hydrationWalkTarget.x, windowY - hydrationWalkTarget.y) < runSpeed * 1.5) {
       hydrationWalkTarget = null;   // arrived
-      behavior.setParked(false);   // unfreeze
       behavior.enter(PetState.drink); // play drink animation & show persistent bubble
     }
   } else if (parkWalkTarget) {
@@ -1373,6 +1378,7 @@ window.triggerState = (stateName) => {
   if (stateName === 'drink') {
     triggerWaterHydrationFlow();
   } else {
+    isManuallyParked = false;
     behavior.enter(stateName);
   }
 };
@@ -1388,11 +1394,13 @@ function parkPet() {
   currentAnim = 'walk';       // play the walk animation while strolling over
   currentFrameIndex = 0;
   animTime = 0;
+  isManuallyParked = true;
 }
 
 function pokePet() {
   parkWalkTarget = null;
   behavior.setParked(false);  // resume: the cat starts moving normally again
+  isManuallyParked = false;
 }
 
 // Electron IPC listeners for tray menus
@@ -1423,7 +1431,9 @@ window.submitPromptDialog = () => {
   if (dialog && input) {
     dialog.style.display = 'none';
     isPromptDialogOpen = false;
-    behavior.setParked(false);
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
     if (promptCallback) {
       promptCallback(input.value);
       promptCallback = null;
@@ -1436,7 +1446,9 @@ window.cancelPromptDialog = () => {
   if (dialog) {
     dialog.style.display = 'none';
     isPromptDialogOpen = false;
-    behavior.setParked(false);
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
     promptCallback = null;
   }
 };

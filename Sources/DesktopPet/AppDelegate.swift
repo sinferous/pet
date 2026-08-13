@@ -50,6 +50,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             },
             sayHandler: { [weak petWindowController] in
                 petWindowController?.say()
+            },
+            hideSeekHandler: { [weak petWindowController] hidden in
+                petWindowController?.setHidden(hidden)
             })
 
         petWindowController?.onRightClick = { [weak statusItemController] in

@@ -15,7 +15,8 @@ let settings = {
   waterReminders: true,
   waterIntervalMinutes: 60,
   autoStart: true,
-  isParked: false
+  isParked: false,
+  isHidden: false
 };
 
 function loadSettings() {
@@ -100,6 +101,9 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
+  if (settings.isHidden) {
+    mainWindow.hide();
+  }
 
   // Linux-only global mouse polling to support transparent click-through
   // (since { forward: true } option of setIgnoreMouseEvents is macOS/Windows only).
@@ -240,6 +244,21 @@ function getMenuTemplate() {
         settings.isParked = false;
         saveSettings();
         sendToRenderer('menu-action', 'poke');
+        updateTrayMenu();
+      }
+    },
+    {
+      label: 'Hide/Seek',
+      type: 'checkbox',
+      checked: settings.isHidden,
+      click: (item) => {
+        settings.isHidden = item.checked;
+        saveSettings();
+        if (item.checked) {
+          if (mainWindow) mainWindow.hide();
+        } else {
+          if (mainWindow) mainWindow.show();
+        }
         updateTrayMenu();
       }
     },

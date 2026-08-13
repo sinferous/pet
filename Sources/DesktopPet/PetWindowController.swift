@@ -32,6 +32,7 @@ final class PetWindowController {
     private var isDragging = false
     private var dragOffset: NSPoint = .zero
     private var baseWindowY: CGFloat = 0
+    private var isManuallyParked = false
 
     // ── Constants ──
     private let petScale: CGFloat = 8.0   // 16px sprite → 128pt on screen
@@ -76,7 +77,13 @@ final class PetWindowController {
         scene.onMouseDragged = { [weak self] in self?.handleMouseDragged(to: $0) }
         scene.onMouseUp = { [weak self] in self?.handleMouseUp() }
         scene.onCloseSpeechBubble = { [weak self] in
-            self?.behavior.triggerActivity(.run) // run somewhere else immediately!
+            guard let self else { return }
+            if self.isManuallyParked {
+                self.park()
+            } else {
+                self.behavior.setParked(false)
+                self.behavior.triggerActivity(.run) // run somewhere else immediately!
+            }
         }
         scene.onRightClick = { [weak self] in self?.onRightClick?() }
 
@@ -148,6 +155,14 @@ final class PetWindowController {
 
     func show() {
         window.orderFrontRegardless()
+    }
+
+    func setHidden(_ hidden: Bool) {
+        if hidden {
+            window.orderOut(nil)
+        } else {
+            window.orderFrontRegardless()
+        }
     }
 
     // MARK: - Frame tick (60 Hz from PetScene)
@@ -263,6 +278,7 @@ final class PetWindowController {
         parkWalkTarget = (x: Double(screen.frame.minX) + 12, y: Double(screen.frame.minY))
         behavior.setParked(true)
         walkTarget = nil
+        isManuallyParked = true
         let walkFrames = PixelPetGenerator.frames(for: .walk)
         scene.play(animation: .walk, frames: walkFrames)
     }
@@ -270,6 +286,7 @@ final class PetWindowController {
     /// "Poke": clear the parked state so the cat starts moving normally again.
     func unpark() {
         parkWalkTarget = nil
+        isManuallyParked = false
         behavior.setParked(false)
     }
 
@@ -287,9 +304,11 @@ final class PetWindowController {
                                           y: curY + dy / len * s))
             facing = dx >= 0 ? .right : .left
             scene.setFacing(facing)
+            baseWindowY = window.frame.origin.y
         }
         if len < walkSpeed * 1.5 {
             parkWalkTarget = nil // arrived: park in place
+            baseWindowY = window.frame.origin.y
             let idleFrames = PixelPetGenerator.frames(for: .idle)
             scene.play(animation: .idle, frames: idleFrames)
         }
@@ -331,7 +350,6 @@ final class PetWindowController {
         if len < runSpeed * 1.5 {
             hydrationWalkTarget = nil
             isHydrating = true
-            behavior.setParked(false)
             behavior.triggerActivity(.drink)
         }
     }
