@@ -324,6 +324,11 @@ window.addEventListener('contextmenu', (e) => {
 function handleMouseMove(e) {
   if (isDragging || !isElectron) return;
 
+  if ((typeof isPromptDialogOpen !== 'undefined' && isPromptDialogOpen) || (typeof isReminderDialogOpen !== 'undefined' && isReminderDialogOpen)) {
+    ipcRenderer.send('set-ignore-mouse-events', false, { forward: true });
+    return;
+  }
+
   const closeEl = document.getElementById('speechBubbleClose');
   const isOverCloseBtn = e.target === closeEl || (e.target && e.target.closest('#speechBubbleClose'));
 
@@ -508,6 +513,11 @@ behavior.onStateChange = (state) => {
     } else {
       triggerWaterReminderBubble();
     }
+  } else if (state === PetState.cheer) {
+    if (pendingCustomReminderMessage) {
+      showSpeechBubble(pendingCustomReminderMessage, true);
+      pendingCustomReminderMessage = null;
+    }
   } else if (state === PetState.react) {
     // React state plays animation but has no voice bubbles as requested
   }
@@ -537,7 +547,11 @@ function loop(now) {
     currentAnim = 'run';
     if (Math.hypot(windowX - hydrationWalkTarget.x, windowY - hydrationWalkTarget.y) < walkSpeed * 2.5 * 1.5) {
       hydrationWalkTarget = null;
-      behavior.enter(PetState.drink);
+      if (pendingCustomReminderMessage) {
+        behavior.enter(PetState.cheer);
+      } else {
+        behavior.enter(PetState.drink);
+      }
     }
   } else if (behavior.state === PetState.walk) {
     advanceWalk();
@@ -656,6 +670,8 @@ window.showReminderDialog = () => {
     dialog.style.display = 'block';
     isReminderDialogOpen = true;
     behavior.setParked(true); // pause pet while typing
+    walkTarget = null; // stop any active walk!
+    currentAnim = 'idle'; // reset to idle animation!
     if (isElectron) {
       ipcRenderer.send('set-ignore-mouse-events', false);
     }

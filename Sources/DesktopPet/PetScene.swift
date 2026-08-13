@@ -104,6 +104,10 @@ final class PetScene: SKScene {
             showWaterSpeechBubble()
         }
 
+        if animation == .jump && pendingCustomMessage != nil {
+            showWaterSpeechBubble()
+        }
+
         petSprite.play(textures: textures, fps: animation.fps, targetSize: petSize)
     }
 

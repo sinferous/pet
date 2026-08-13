@@ -78,6 +78,7 @@ final class PetWindowController {
         scene.onMouseUp = { [weak self] in self?.handleMouseUp() }
         scene.onCloseSpeechBubble = { [weak self] in
             guard let self else { return }
+            self.isHydrating = false
             if self.isManuallyParked {
                 self.park()
             } else {
@@ -350,7 +351,11 @@ final class PetWindowController {
         if len < runSpeed * 1.5 {
             hydrationWalkTarget = nil
             isHydrating = true
-            behavior.triggerActivity(.drink)
+            if scene.pendingCustomMessage != nil {
+                behavior.triggerActivity(.cheer)
+            } else {
+                behavior.triggerActivity(.drink)
+            }
         }
     }
 
