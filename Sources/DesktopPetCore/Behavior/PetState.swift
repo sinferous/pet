@@ -33,7 +33,7 @@ public enum PetState: String, Sendable, CaseIterable {
         case .jump: return .jump
         case .roll: return .roll
         case .woolball: return .play // plays with the wool ball using the play sprites
-        case .cheer: return .jump    // cheer reuses the jump sprites (bouncy confetti)
+        case .cheer: return .love    // cheer reuses the love sprites (bouncy confetti)
         case .love: return .love
         }
     }

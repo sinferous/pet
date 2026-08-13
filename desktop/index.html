@@ -1181,9 +1181,9 @@ window.showSayBubble = showSayBubble;
 // State transition callback
 behavior.onStateChange = (state) => {
   currentAnim = state === PetState.follow ? 'walk' : state;
-  // cheer reuses the jump sprites; woolball reuses the play sprites
+  // cheer reuses the love sprites to keep it static; woolball reuses the play sprites
   if (state === PetState.cheer) {
-    currentAnim = 'jump';
+    currentAnim = 'love';
   } else if (state === PetState.woolball) {
     currentAnim = 'play';
   }
@@ -1512,9 +1512,16 @@ window.submitReminderDialog = () => {
   const timeInput = document.getElementById('reminderTimeInput');
   const msgInput = document.getElementById('reminderMsgInput');
   if (dialog && timeInput && msgInput) {
-    const time = timeInput.value.trim();
+    let time = timeInput.value.trim();
     const msg = msgInput.value.trim();
     if (time && msg) {
+      // Normalize time format (e.g. "6:20" -> "06:20")
+      const parts = time.split(':');
+      if (parts.length === 2) {
+        const hr = parts[0].trim().padStart(2, '0');
+        const min = parts[1].trim().padStart(2, '0');
+        time = `${hr}:${min}`;
+      }
       customReminders.push({ time, msg, triggered: false });
     }
     dialog.style.display = 'none';

@@ -129,8 +129,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         alert.window.initialFirstResponder = timeField
         
         if alert.runModal() == .alertFirstButtonReturn {
-            let time = timeField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            var time = timeField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
             let msg = msgField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Normalize time input format (e.g. "6:20" -> "06:20")
+            let parts = time.split(separator: ":")
+            if parts.count == 2, let hVal = Int(parts[0]), let mVal = Int(parts[1]) {
+                time = String(format: "%02d:%02d", hVal, mVal)
+            }
+            
             if !time.isEmpty && !msg.isEmpty {
                 customReminders.append(CustomReminder(time: time, message: msg, triggered: false))
             }
