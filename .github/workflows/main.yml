@@ -56,6 +56,8 @@ jobs:
       - name: Install dependencies
         working-directory: desktop
         run: npm install
+        env:
+          ELECTRON_MIRROR: "https://npmmirror.com/mirrors/electron/"
 
       - name: Build Electron App (.exe)
         working-directory: desktop
@@ -87,6 +89,8 @@ jobs:
       - name: Install dependencies
         working-directory: desktop
         run: npm install
+        env:
+          ELECTRON_MIRROR: "https://npmmirror.com/mirrors/electron/"
 
       - name: Build Electron App (Linux)
         working-directory: desktop
