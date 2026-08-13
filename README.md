@@ -18,6 +18,7 @@ Published by **sinferous** 🐾
 - 💧 **Smart Water Reminders** — Keeps you hydrated on your terms:
   - Custom interval selector (choose every 1, 15, 30, 45, or 60 minutes).
   - Silent meows: Reminders are purely water-focused—no noisy random meows/purrs.
+- ⏰ **Custom Reminders for Today** — Set custom time alarms (e.g., "14:30") with a personalized reminder message. The pet will sprint to the center of the display and display your message. These reminders only run for the current day.
 - 🏃‍♂️ **Hydration Sprint** — When it is water time, the cat runs directly to the center of your primary screen.
 - 💬 **Persistent Alert & Close Button** — The water voice bubble stays in the center of the screen until you click the red "×" button.
 - 🚀 **Dismiss Sprint** — Dismissing the water alert triggers the cat to immediately sprint away (either to a random location, or back to the bottom-left corner if it was previously in Park/Idle mode).

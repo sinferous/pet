@@ -369,6 +369,23 @@ final class PetWindowController {
         behavior.setParked(true)
     }
 
+    func triggerCustomReminder(message: String) {
+        scene.pendingCustomMessage = message
+        
+        let screens = ScreenAdapter.screenRects()
+        guard !screens.isEmpty else { return }
+        let s = screens[0]
+        
+        let targetX = s.minX + (s.width - Double(winWidth)) / 2
+        let targetY = s.minY + (s.height - Double(winHeight)) / 2 - 100
+        
+        hydrationWalkTarget = (x: targetX, y: targetY)
+        
+        let runFrames = PixelPetGenerator.frames(for: .run)
+        scene.play(animation: .run, frames: runFrames)
+        behavior.setParked(true)
+    }
+
     // MARK: - Click / Drag
 
     private func handleMouseDown(at scenePoint: NSPoint) {

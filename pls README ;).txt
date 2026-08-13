@@ -77,6 +77,7 @@ A small desktop pet made to bring a little life to your workspace.
   - Toggle "Hide/Seek" to instantly hide or show the pet.
   - Toggle "Idle (Park)" to park the pet in the bottom-left corner.
   - Choose "Poke" to unpark the pet.
+  - Choose "Set Custom Reminder..." to set a time (e.g. 14:30) and message for today.
 
 
 2. Cross-Platform Desktop Version (Windows & Ubuntu Linux)
@@ -91,6 +92,7 @@ Windows:
   - Select "Hide/Seek" to completely hide or show the pet window.
   - Select "Idle (Park)" to send the pet to the bottom-left corner.
   - Select "Poke" to unpark the pet.
+  - Select "Set Custom Reminder..." to input a time and alert message for today.
   - Select "Quit" to exit.
 
 Ubuntu (Linux):
@@ -101,6 +103,7 @@ Ubuntu (Linux):
   - Select "Hide/Seek" to completely hide or show the pet window.
   - Select "Idle (Park)" to send the pet to the bottom-left corner.
   - Select "Poke" to unpark the pet.
+  - Select "Set Custom Reminder..." to input a time and alert message for today.
   - Select "Quit" to exit.
 
 

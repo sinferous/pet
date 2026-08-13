@@ -22,6 +22,7 @@ final class PetScene: SKScene {
     // MARK: - Sprite
     private let petSprite = PetSprite()
     private var zzzLabel: SKLabelNode?
+    var pendingCustomMessage: String? = nil
 
     // MARK: - Celebration effects (confetti / hearts / wool ball)
     /// Set by the controller while the pet is cheering (drives the confetti trickle).
@@ -226,8 +227,13 @@ final class PetScene: SKScene {
     }
 
     private func showWaterSpeechBubble() {
-        let txt = waterSentences.randomElement() ?? "💧 Drink water!"
-        showSpeechBubble(text: txt, duration: 6.0, isWaterReminder: true)
+        if let msg = pendingCustomMessage {
+            showSpeechBubble(text: msg, duration: 6.0, isWaterReminder: true)
+            pendingCustomMessage = nil
+        } else {
+            let txt = waterSentences.randomElement() ?? "💧 Drink water!"
+            showSpeechBubble(text: txt, duration: 6.0, isWaterReminder: true)
+        }
     }
 
     func showRandomMeowSpeechBubble() {

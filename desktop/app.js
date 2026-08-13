@@ -502,7 +502,12 @@ behavior.onStateChange = (state) => {
   if (state === PetState.walk || state === PetState.run) {
     startWalk();
   } else if (state === PetState.drink) {
-    triggerWaterReminderBubble();
+    if (pendingCustomReminderMessage) {
+      showSpeechBubble(pendingCustomReminderMessage, true);
+      pendingCustomReminderMessage = null;
+    } else {
+      triggerWaterReminderBubble();
+    }
   } else if (state === PetState.react) {
     // React state plays animation but has no voice bubbles as requested
   }
@@ -639,10 +644,89 @@ window.triggerState = (stateName) => {
   }
 };
 
+let customReminders = [];
+let pendingCustomReminderMessage = null;
+let isReminderDialogOpen = false;
+
+window.showReminderDialog = () => {
+  const dialog = document.getElementById('reminderDialog');
+  const timeInput = document.getElementById('reminderTimeInput');
+  const msgInput = document.getElementById('reminderMsgInput');
+  if (dialog) {
+    dialog.style.display = 'block';
+    isReminderDialogOpen = true;
+    behavior.setParked(true); // pause pet while typing
+    if (isElectron) {
+      ipcRenderer.send('set-ignore-mouse-events', false);
+    }
+    if (timeInput) timeInput.focus();
+  }
+};
+
+window.submitReminderDialog = () => {
+  const dialog = document.getElementById('reminderDialog');
+  const timeInput = document.getElementById('reminderTimeInput');
+  const msgInput = document.getElementById('reminderMsgInput');
+  if (dialog && timeInput && msgInput) {
+    const time = timeInput.value.trim();
+    const msg = msgInput.value.trim();
+    if (time && msg) {
+      customReminders.push({ time, msg, triggered: false });
+    }
+    dialog.style.display = 'none';
+    isReminderDialogOpen = false;
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
+  }
+};
+
+window.cancelReminderDialog = () => {
+  const dialog = document.getElementById('reminderDialog');
+  if (dialog) {
+    dialog.style.display = 'none';
+    isReminderDialogOpen = false;
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
+  }
+};
+
+function triggerCustomReminder(message) {
+  pendingCustomReminderMessage = message;
+  
+  if (screens.length === 0) return;
+  const s = screens[0];
+  
+  const targetX = s.minX + (s.width - petWidth) / 2;
+  const targetY = s.minY + (s.height - winHeight) / 2 - 100;
+  
+  hydrationWalkTarget = { x: targetX, y: targetY };
+  behavior.setParked(true);   // freeze machine decisions
+  currentAnim = 'run';
+  currentFrameIndex = 0;
+  animTime = 0;
+}
+
+// Custom Reminders polling loop (every 10 seconds)
+setInterval(() => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const nowStr = `${hours}:${minutes}`;
+  
+  customReminders.forEach(r => {
+    if (!r.triggered && r.time === nowStr) {
+      r.triggered = true;
+      triggerCustomReminder(r.msg);
+    }
+  });
+}, 10000);
+
 // Force the cat to walk/run to a random position every 1 minute
 setInterval(() => {
   // Ignore if busy, dragging, settings dialog open, or showing a water reminder
-  if (hydrationWalkTarget || isPromptDialogOpen || isDragging || isWaterReminderActive) return;
+  if (hydrationWalkTarget || isPromptDialogOpen || isReminderDialogOpen || isDragging || isWaterReminderActive) return;
   const state = Math.random() < 0.5 ? PetState.walk : PetState.run;
   behavior.enter(state);
 }, 60000);

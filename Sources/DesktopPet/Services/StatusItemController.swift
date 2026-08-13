@@ -25,6 +25,7 @@ final class StatusItemController {
     private let hideSeekItem = NSMenuItem()
     private let sayItem = NSMenuItem()
     private let hideSeekHandler: (Bool) -> Void
+    private let customReminderHandler: () -> Void
 
     init(settings: SettingsStore,
          sleepPreventer: SleepPreventer,
@@ -33,7 +34,8 @@ final class StatusItemController {
          behavior: BehaviorMachine,
          parkHandler: @escaping (Bool) -> Void,
          sayHandler: @escaping () -> Void,
-         hideSeekHandler: @escaping (Bool) -> Void) {
+         hideSeekHandler: @escaping (Bool) -> Void,
+         customReminderHandler: @escaping () -> Void) {
         self.settings = settings
         self.sleepPreventer = sleepPreventer
         self.autoStart = autoStart
@@ -42,6 +44,7 @@ final class StatusItemController {
         self.parkHandler = parkHandler
         self.sayHandler = sayHandler
         self.hideSeekHandler = hideSeekHandler
+        self.customReminderHandler = customReminderHandler
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
@@ -95,6 +98,10 @@ final class StatusItemController {
         sayItem.target = self
         sayItem.action = #selector(triggerSay)
         menu.addItem(sayItem)
+
+        let customReminderItem = NSMenuItem(title: "Set Custom Reminder…", action: #selector(setCustomReminder), keyEquivalent: "")
+        customReminderItem.target = self
+        menu.addItem(customReminderItem)
 
         let movementsItem = NSMenuItem(title: "Movements", action: nil, keyEquivalent: "")
         movementsItem.submenu = buildMovementsMenu()
@@ -209,6 +216,10 @@ final class StatusItemController {
         isHidden.toggle()
         hideSeekHandler(isHidden)
         refreshCheckmarks()
+    }
+
+    @objc private func setCustomReminder() {
+        customReminderHandler()
     }
 
     @objc private func triggerSay() {

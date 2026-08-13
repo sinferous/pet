@@ -238,6 +238,12 @@ function getMenuTemplate() {
       }
     },
     {
+      label: 'Set Custom Reminder…',
+      click: () => {
+        sendToRenderer('menu-action', 'prompt-custom-reminder');
+      }
+    },
+    {
       label: 'Start at Login',
       type: 'checkbox',
       checked: settings.autoStart,

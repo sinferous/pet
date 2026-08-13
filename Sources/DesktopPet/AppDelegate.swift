@@ -11,6 +11,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     private var autoStart: AutoStartManager?
     private var activity: NSObjectProtocol?
 
+    private struct CustomReminder {
+        let time: String // e.g. "14:30"
+        let message: String
+        var triggered: Bool
+    }
+    private var customReminders: [CustomReminder] = []
+    private var reminderTimer: Timer?
+
     // MARK: - Lifecycle
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -35,6 +43,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         petWindowController = PetWindowController(behavior: behavior)
         petWindowController?.show()
 
+        reminderTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+            self?.checkCustomReminders()
+        }
+
         statusItemController = StatusItemController(
             settings: settings,
             sleepPreventer: sleepPreventer!,
@@ -53,6 +65,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             },
             hideSeekHandler: { [weak petWindowController] hidden in
                 petWindowController?.setHidden(hidden)
+            },
+            customReminderHandler: { [weak self] in
+                self?.showCustomReminderDialog()
             })
 
         petWindowController?.onRightClick = { [weak statusItemController] in
@@ -92,7 +107,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         }
     }
 
+    private func showCustomReminderDialog() {
+        let alert = NSAlert()
+        alert.messageText = "Set Custom Reminder"
+        alert.informativeText = "Enter time (24h format, e.g. 14:30) and message for today."
+        alert.addButton(withTitle: "Set")
+        alert.addButton(withTitle: "Cancel")
+        
+        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 220, height: 60))
+        
+        let timeField = NSTextField(frame: NSRect(x: 0, y: 35, width: 220, height: 22))
+        timeField.placeholderString = "Time (e.g. 14:30)"
+        
+        let msgField = NSTextField(frame: NSRect(x: 0, y: 0, width: 220, height: 22))
+        msgField.placeholderString = "Message"
+        
+        customView.addSubview(timeField)
+        customView.addSubview(msgField)
+        alert.accessoryView = customView
+        
+        alert.window.initialFirstResponder = timeField
+        
+        if alert.runModal() == .alertFirstButtonReturn {
+            let time = timeField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            let msg = msgField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !time.isEmpty && !msg.isEmpty {
+                customReminders.append(CustomReminder(time: time, message: msg, triggered: false))
+            }
+        }
+    }
+
+    private func checkCustomReminders() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        let nowStr = formatter.string(from: Date())
+        
+        for i in 0..<customReminders.count {
+            if !customReminders[i].triggered && customReminders[i].time == nowStr {
+                customReminders[i].triggered = true
+                petWindowController?.triggerCustomReminder(message: customReminders[i].message)
+            }
+        }
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
+        reminderTimer?.invalidate()
         sleepPreventer?.stop()
         waterReminder?.disable()
         if let activity { ProcessInfo.processInfo.endActivity(activity) }

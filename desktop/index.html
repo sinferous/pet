@@ -48,6 +48,18 @@
         <button id="promptCancelBtn" class="modal-btn cancel-btn" onclick="cancelPromptDialog()">Cancel</button>
       </div>
     </div>
+    <div id="reminderDialog" style="display: none; position: absolute; top: 70px; left: -26px; width: 180px; background: #fffff0; color: #010101; border: 3px solid #010101; border-radius: 12px; padding: 12px; box-shadow: 4px 4px 0px #010101; z-index: 99999; font-family: 'Courier New', Courier, monospace; box-sizing: border-box; pointer-events: auto;">
+      <label style="font-weight: bold; font-size: 11px; display: block; margin-bottom: 4px;">Time (e.g. 14:30):</label>
+      <input type="text" id="reminderTimeInput" placeholder="14:30" style="width: 100%; padding: 4px; border: 2px solid #010101; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 12px; box-sizing: border-box; margin-bottom: 8px; text-align: center; background: #ffffff;">
+      
+      <label style="font-weight: bold; font-size: 11px; display: block; margin-bottom: 4px;">Message:</label>
+      <input type="text" id="reminderMsgInput" placeholder="Reminder!" style="width: 100%; padding: 4px; border: 2px solid #010101; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 12px; box-sizing: border-box; margin-bottom: 12px; text-align: center; background: #ffffff;">
+      
+      <div class="modal-buttons">
+        <button class="modal-btn ok-btn" onclick="submitReminderDialog()">OK</button>
+        <button class="modal-btn cancel-btn" onclick="cancelReminderDialog()">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <div id="controlPanel">
@@ -74,6 +86,7 @@
     <button onclick="parkPet()">Idle (Park)</button>
     <button onclick="pokePet()">Poke</button>
     <button onclick="showSayBubble()">Say</button>
+    <button onclick="showReminderDialog()">Custom Reminder</button>
   </div>
   
   <script>
@@ -1039,7 +1052,7 @@ if (isElectron) {
       return;
     }
     
-    if (typeof isPromptDialogOpen !== 'undefined' && isPromptDialogOpen) {
+    if ((typeof isPromptDialogOpen !== 'undefined' && isPromptDialogOpen) || (typeof isReminderDialogOpen !== 'undefined' && isReminderDialogOpen)) {
       ipcRenderer.send('set-ignore-mouse-events', false);
       return;
     }
@@ -1190,7 +1203,12 @@ behavior.onStateChange = (state) => {
   if (state === PetState.walk || state === PetState.run) {
     startWalk();
   } else if (state === PetState.drink) {
-    triggerWaterReminderBubble();
+    if (pendingCustomReminderMessage) {
+      showSpeechBubble(pendingCustomReminderMessage, true);
+      pendingCustomReminderMessage = null;
+    } else {
+      triggerWaterReminderBubble();
+    }
   } else if (state === PetState.react) {
     // React state plays animation but has no voice bubbles as requested
   }
@@ -1459,6 +1477,85 @@ window.cancelPromptDialog = () => {
   }
 };
 
+let customReminders = [];
+let pendingCustomReminderMessage = null;
+let isReminderDialogOpen = false;
+
+window.showReminderDialog = () => {
+  const dialog = document.getElementById('reminderDialog');
+  const timeInput = document.getElementById('reminderTimeInput');
+  const msgInput = document.getElementById('reminderMsgInput');
+  if (dialog) {
+    dialog.style.display = 'block';
+    isReminderDialogOpen = true;
+    behavior.setParked(true); // pause pet while typing
+    if (isElectron) {
+      ipcRenderer.send('set-ignore-mouse-events', false);
+    }
+    if (timeInput) timeInput.focus();
+  }
+};
+
+window.submitReminderDialog = () => {
+  const dialog = document.getElementById('reminderDialog');
+  const timeInput = document.getElementById('reminderTimeInput');
+  const msgInput = document.getElementById('reminderMsgInput');
+  if (dialog && timeInput && msgInput) {
+    const time = timeInput.value.trim();
+    const msg = msgInput.value.trim();
+    if (time && msg) {
+      customReminders.push({ time, msg, triggered: false });
+    }
+    dialog.style.display = 'none';
+    isReminderDialogOpen = false;
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
+  }
+};
+
+window.cancelReminderDialog = () => {
+  const dialog = document.getElementById('reminderDialog');
+  if (dialog) {
+    dialog.style.display = 'none';
+    isReminderDialogOpen = false;
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
+  }
+};
+
+function triggerCustomReminder(message) {
+  pendingCustomReminderMessage = message;
+  
+  if (screens.length === 0) return;
+  const s = screens[0];
+  
+  const targetX = s.minX + (s.width - petWidth) / 2;
+  const targetY = s.minY + (s.height - winHeight) / 2 - 100;
+  
+  hydrationWalkTarget = { x: targetX, y: targetY };
+  behavior.setParked(true);   // freeze machine decisions
+  currentAnim = 'run';
+  currentFrameIndex = 0;
+  animTime = 0;
+}
+
+// Custom Reminders polling loop (every 10 seconds)
+setInterval(() => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const nowStr = `${hours}:${minutes}`;
+  
+  customReminders.forEach(r => {
+    if (!r.triggered && r.time === nowStr) {
+      r.triggered = true;
+      triggerCustomReminder(r.msg);
+    }
+  });
+}, 10000);
+
 if (isElectron) {
   // Handle menu actions from Tray
   ipcRenderer.on('menu-action', (event, action, data) => {
@@ -1470,6 +1567,8 @@ if (isElectron) {
       showSayBubble();
     } else if (action === 'trigger-state') {
       triggerState(data);
+    } else if (action === 'prompt-custom-reminder') {
+      showReminderDialog();
     }
   });
 
