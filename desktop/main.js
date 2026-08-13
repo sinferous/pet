@@ -153,7 +153,11 @@ function createWindow() {
   ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (win) {
-      win.setIgnoreMouseEvents(ignore, options);
+      if (process.platform === 'linux') {
+        win.setIgnoreMouseEvents(ignore);
+      } else {
+        win.setIgnoreMouseEvents(ignore, options);
+      }
     }
   });
 
