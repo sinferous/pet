@@ -11,6 +11,7 @@ final class PetWindowController {
     private let scene: PetScene
     private let behavior: BehaviorMachine
     private var cursorMonitor: Any?
+    private var localMonitor: Any?
     private var meowTimer: Timer?
 
     // ── Right click callback ──
@@ -55,6 +56,7 @@ final class PetWindowController {
         let frameRect = NSRect(origin: origin, size: NSSize(width: winWidth, height: winHeight))
 
         window = PetWindow(contentRect: frameRect)
+        window.ignoresMouseEvents = true
         baseWindowY = origin.y
 
         skView = PetSKView(frame: NSRect(origin: .zero, size: frameRect.size))
@@ -132,13 +134,20 @@ final class PetWindowController {
         let idleFrames = PixelPetGenerator.frames(for: .idle)
         scene.play(animation: .idle, frames: idleFrames)
 
-        // Install global mouse-move monitor to detect cursor proximity.
+        // Install global mouse-move monitor to detect cursor proximity and update hit-testing when backgrounded.
         cursorMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
             guard let self else { return }
             let mouseLoc = NSEvent.mouseLocation
             let petRect = self.window.frame.insetBy(dx: -40, dy: -40)
             let inRange = petRect.contains(mouseLoc)
             self.behavior.setCursor(inRange: inRange)
+            self.updateIgnoreMouseEvents()
+        }
+
+        // Install local mouse-move monitor to update hit-testing when application is active.
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
+            self?.updateIgnoreMouseEvents()
+            return event
         }
 
         // Random background meows timer removed to keep the cat quiet as requested.
@@ -151,6 +160,7 @@ final class PetWindowController {
 
     deinit {
         if let cursorMonitor { NSEvent.removeMonitor(cursorMonitor) }
+        if let localMonitor { NSEvent.removeMonitor(localMonitor) }
         meowTimer?.invalidate()
     }
 
