@@ -135,7 +135,7 @@ public final class BehaviorMachine {
 
         // Finite-duration states expire.
         switch state {
-        case .react, .drink, .sleep, .follow, .laugh, .jump:
+        case .react, .drink, .sleep, .follow, .laugh, .jump, .anger:
             if t >= stateUntil {
                 enter(.idle)
             }
@@ -223,6 +223,8 @@ public final class BehaviorMachine {
         switch newState {
         case .react:
             stateUntil = t + 2.5
+        case .anger:
+            stateUntil = t + 4.0
         case .drink:
             stateUntil = t + 6.0
         case .sleep:

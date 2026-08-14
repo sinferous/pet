@@ -512,6 +512,7 @@ extension PetAnimation {
         case .jump:   return 9
         case .roll:   return 7
         case .love:   return 4
+        case .anger:  return 2
         }
     }
 }

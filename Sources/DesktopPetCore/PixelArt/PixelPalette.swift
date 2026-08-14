@@ -33,6 +33,7 @@ public enum PixelPalette {
         "G": PixelRGBA(111, 194, 118),   // bottle green
         "L": PixelRGBA(217, 242, 221),   // bottle highlight
         "H": PixelRGBA(255, 123, 172),   // heart (used by scene overlays)
+        "R": PixelRGBA(242, 60, 60),      // red (anger mark)
     ]
 
     /// Returns the color for a character, or `.clear` for `.` (transparent).

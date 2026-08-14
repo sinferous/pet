@@ -17,6 +17,7 @@ public enum PetState: String, Sendable, CaseIterable {
     case woolball
     case cheer
     case love
+    case anger
 
     /// The animation that visually represents this state.
     public var animation: PetAnimation {
@@ -35,6 +36,7 @@ public enum PetState: String, Sendable, CaseIterable {
         case .woolball: return .play // plays with the wool ball using the play sprites
         case .cheer: return .love    // cheer reuses the love sprites (bouncy confetti)
         case .love: return .love
+        case .anger: return .anger
         }
     }
 }

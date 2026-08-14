@@ -116,6 +116,15 @@ final class PetWindowController {
                 self.startWalk()
             } else if state == .react {
                 // Silenced meow/purr bubbles on click
+            } else if state == .anger {
+                let angerMessages = [
+                    "💢 Grrr! Stop slacking!",
+                    "💢 Focus, human!",
+                    "💢 Doomscrolling detected!",
+                    "💢 Don't ignore me!"
+                ]
+                let msg = angerMessages.randomElement() ?? "💢 Focus, human!"
+                self.scene.showSpeechBubble(text: msg, duration: 4.0)
             }
 
             // Celebration effects.

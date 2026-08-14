@@ -138,6 +138,7 @@ final class StatusItemController {
             ("Wool Ball", .woolball),
             ("Cheer", .cheer),
             ("Love", .love),
+            ("Anger", .anger),
         ]
         for (title, state) in movements {
             let item = NSMenuItem(title: title, action: #selector(triggerMovement(_:)), keyEquivalent: "")

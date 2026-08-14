@@ -14,6 +14,7 @@ public enum PetAnimation: String, CaseIterable, Sendable {
     case jump
     case roll
     case love
+    case anger
 }
 
 /// Procedural pixel-art generator for the default pet — a round, symmetric
@@ -44,6 +45,7 @@ public enum PixelPetGenerator {
         case .jump:    return idleFrames() // Fallback for procedural engine
         case .roll:    return rollFrames()
         case .love:    return loveFrames()
+        case .anger:   return angerFrames()
         }
     }
 
@@ -134,6 +136,13 @@ public enum PixelPetGenerator {
         ]
     }
 
+    private static func angerFrames() -> [[String]] {
+        return [
+            render(bob: 0, feet: (0, 0), tail: 0, eyes: .angry, angryMark: true),
+            render(bob: 1, feet: (0, 0), tail: 1, eyes: .angry, angryMark: true),
+        ]
+    }
+
     // MARK: - Rendering primitives
 
     private struct Grid {
@@ -178,7 +187,7 @@ public enum PixelPetGenerator {
     }
 
     private enum EyeStyle {
-        case open, closed, happy, heart
+        case open, closed, happy, heart, angry
     }
 
     private enum BottlePose {
@@ -197,6 +206,7 @@ public enum PixelPetGenerator {
         var bodyRx: Double? = nil
         var bodyRy: Double? = nil
         var bodyCy: Double? = nil
+        var angryMark = false
     }
 
     private static func render(bob: Int = 0,
@@ -209,7 +219,8 @@ public enum PixelPetGenerator {
                                happyBlush: Bool = false,
                                bodyRx: Double? = nil,
                                bodyRy: Double? = nil,
-                               bodyCy: Double? = nil) -> [String] {
+                               bodyCy: Double? = nil,
+                               angryMark: Bool = false) -> [String] {
         var grid = Grid()
         let dy = Double(bob)
 
@@ -232,6 +243,7 @@ public enum PixelPetGenerator {
         drawFace(&grid, eyes: eyes, headTilt: headTilt, happyBlush: happyBlush)
 
         if bottle != .none { drawBottle(&grid, pose: bottle) }
+        if angryMark { drawAngerMark(&grid, bob: bob) }
 
         return grid.rows()
     }
@@ -316,13 +328,21 @@ public enum PixelPetGenerator {
             }
             for x in 5...6 { grid.set(x, eyeY, "E"); grid.set(x, eyeY + 1, "E") }
             for x in 9...10 { grid.set(x, eyeY, "E"); grid.set(x, eyeY + 1, "E") }
+        case .angry:
+            // Angry slanted eyes
+            grid.set(4, eyeY + 1, "E"); grid.set(5, eyeY, "E"); grid.set(6, eyeY, "E")
+            grid.set(11, eyeY + 1, "E"); grid.set(10, eyeY, "E"); grid.set(9, eyeY, "E")
         }
 
         grid.set(7, 6 - tilt, "N")
         grid.set(8, 6 - tilt, "N")
 
-        // Mouth: a little "ω".
-        grid.set(6, 4, "W"); grid.set(7, 5, "W"); grid.set(8, 5, "W"); grid.set(9, 4, "W")
+        // Mouth: flat line for angry, little "ω" for others.
+        if eyes == .angry {
+            grid.set(6, 4, "W"); grid.set(7, 4, "W"); grid.set(8, 4, "W"); grid.set(9, 4, "W")
+        } else {
+            grid.set(6, 4, "W"); grid.set(7, 5, "W"); grid.set(8, 5, "W"); grid.set(9, 4, "W")
+        }
 
         // Blush.
         grid.set(3, 7, "P"); grid.set(12, 7, "P")
@@ -353,5 +373,13 @@ public enum PixelPetGenerator {
         case .none:
             break
         }
+    }
+
+    private static func drawAngerMark(_ grid: inout Grid, bob: Int) {
+        let dy = bob
+        grid.set(11, 10 + dy, "R")
+        grid.set(12, 11 + dy, "R")
+        grid.set(13, 10 + dy, "R")
+        grid.set(12, 9 + dy, "R")
     }
 }
