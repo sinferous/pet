@@ -144,7 +144,7 @@ final class PetWindowController {
         // Random background meows timer removed to keep the cat quiet as requested.
     }
 
-    /// Triggered from the menu "Say" item — shows "sathya sathya sathya" bubble.
+    /// Triggered from the menu "Say" item — shows "Sathya Sathya" bubble.
     func say() {
         scene.showSayBubble()
     }
@@ -169,6 +169,15 @@ final class PetWindowController {
     // MARK: - Frame tick (60 Hz from PetScene)
 
     private func tick() {
+        if scene.hasActiveSpeechBubble {
+            // Keep the cat stationary while a speech bubble is active
+            let targetY = baseWindowY
+            if abs(window.frame.origin.y - targetY) > 0.1 {
+                window.setFrameOrigin(NSPoint(x: window.frame.origin.x, y: targetY))
+            }
+            return
+        }
+
         behavior.tick()
         scene.cheerActive = (behavior.state == .cheer)
 
@@ -432,6 +441,10 @@ final class PetWindowController {
                 in: screens) ?? 0
             currentScreenIndex = idx
             baseWindowY = window.frame.origin.y
+            
+            if isManuallyParked {
+                park()
+            }
         } else {
             behavior.handleClick()
         }

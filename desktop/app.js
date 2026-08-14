@@ -308,8 +308,12 @@ window.addEventListener('mouseup', () => {
     }
     behavior.handleDragEnd();
 
-    // Keep the current height instead of snapping to floor
-    updateWindowBounds();
+    if (isManuallyParked) {
+      parkPet();
+    } else {
+      // Keep the current height instead of snapping to floor
+      updateWindowBounds();
+    }
   }
 });
 
@@ -479,8 +483,12 @@ window.closeSpeechBubble = (event) => {
   }
   if (isWaterReminderActive) {
     isWaterReminderActive = false;
-    behavior.setParked(false);
-    behavior.enter(PetState.run); // run somewhere else immediately!
+    if (isManuallyParked) {
+      parkPet();
+    } else {
+      behavior.setParked(false);
+      behavior.enter(PetState.run); // run somewhere else immediately!
+    }
   }
 };
 
@@ -492,7 +500,7 @@ function showSayBubble() {
   // Only show if not currently showing a bubble
   const bubble = document.getElementById('speechBubble');
   if (bubble && bubble.style.display === 'block') return;
-  showSpeechBubble("sathya sathya sathya", 4000);
+  showSpeechBubble("Sathya Sathya", 4000);
 }
 
 window.showSayBubble = showSayBubble;
@@ -546,39 +554,40 @@ let animTime = 0;
 // 60Hz Loop
 let lastTime = performance.now();
 
-function loop(now) {
-  const dt = (now - lastTime) / 1000.0;
-  lastTime = now;
+  const bubble = document.getElementById('speechBubble');
+  const isBubbleActive = bubble && bubble.style.display === 'block';
 
-  behavior.tick();
+  if (!isBubbleActive) {
+    behavior.tick();
 
-  if (hydrationWalkTarget) {
-    // Running to center
-    const step = ScreenNavigator.step(windowX, windowY, hydrationWalkTarget.x, hydrationWalkTarget.y, walkSpeed * 2.5, screens, petWidth, petHeight);
-    facing = step.facing;
-    windowX = step.x;
-    windowY = step.y;
-    updateWindowBounds();
-    currentAnim = 'run';
-    if (Math.hypot(windowX - hydrationWalkTarget.x, windowY - hydrationWalkTarget.y) < walkSpeed * 2.5 * 1.5) {
-      hydrationWalkTarget = null;
-      if (pendingCustomReminderMessage) {
-        behavior.enter(PetState.cheer);
-      } else {
-        behavior.enter(PetState.drink);
+    if (hydrationWalkTarget) {
+      // Running to center
+      const step = ScreenNavigator.step(windowX, windowY, hydrationWalkTarget.x, hydrationWalkTarget.y, walkSpeed * 2.5, screens, petWidth, petHeight);
+      facing = step.facing;
+      windowX = step.x;
+      windowY = step.y;
+      updateWindowBounds();
+      currentAnim = 'run';
+      if (Math.hypot(windowX - hydrationWalkTarget.x, windowY - hydrationWalkTarget.y) < walkSpeed * 2.5 * 1.5) {
+        hydrationWalkTarget = null;
+        if (pendingCustomReminderMessage) {
+          behavior.enter(PetState.cheer);
+        } else {
+          behavior.enter(PetState.drink);
+        }
       }
-    }
-  } else if (behavior.state === PetState.walk) {
-    advanceWalk();
-  } else if (behavior.state === PetState.follow) {
-    advanceFollow();
-  } else if (behavior.state === PetState.idle) {
-    // Proximity check in browser-mode (in Electron it is monitored globally in main.js)
-    if (!isElectron) {
-      const dx = browserMousePos.x - (windowX + petWidth / 2);
-      const dy = browserMousePos.y - (windowY + petHeight / 2);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      behavior.setCursor(dist < 80);
+    } else if (behavior.state === PetState.walk) {
+      advanceWalk();
+    } else if (behavior.state === PetState.follow) {
+      advanceFollow();
+    } else if (behavior.state === PetState.idle) {
+      // Proximity check in browser-mode (in Electron it is monitored globally in main.js)
+      if (!isElectron) {
+        const dx = browserMousePos.x - (windowX + petWidth / 2);
+        const dy = browserMousePos.y - (windowY + petHeight / 2);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        behavior.setCursor(dist < 80);
+      }
     }
   }
 
@@ -781,7 +790,7 @@ setInterval(() => {
 // Force the cat to walk/run to a random position every 1 minute
 setInterval(() => {
   // Ignore if busy, dragging, settings dialog open, or showing a water reminder
-  if (hydrationWalkTarget || isPromptDialogOpen || isReminderDialogOpen || isDragging || isWaterReminderActive) return;
+  if (hydrationWalkTarget || isPromptDialogOpen || isReminderDialogOpen || isDragging || isWaterReminderActive || isManuallyParked) return;
   const state = Math.random() < 0.5 ? PetState.walk : PetState.run;
   behavior.enter(state);
 }, 60000);

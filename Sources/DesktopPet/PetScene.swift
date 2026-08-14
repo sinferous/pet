@@ -157,6 +157,9 @@ final class PetScene: SKScene {
     ]
     
     private var activeSpeechBubble: SKNode?
+    var hasActiveSpeechBubble: Bool {
+        return activeSpeechBubble != nil
+    }
     var onCloseSpeechBubble: (() -> Void)?
     
     func showSpeechBubble(text: String, duration: TimeInterval, isWaterReminder: Bool = false) {
@@ -252,7 +255,7 @@ final class PetScene: SKScene {
     }
 
     func showSayBubble() {
-        showSpeechBubble(text: "sathya sathya sathya", duration: 4.0)
+        showSpeechBubble(text: "Sathya Sathya", duration: 4.0)
     }
 
     // MARK: - Zzz overlay

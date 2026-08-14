@@ -21,7 +21,6 @@ final class StatusItemController {
     private let intervalItem = NSMenuItem()
     private let autoStartItem = NSMenuItem()
     private let idleItem = NSMenuItem()
-    private let pokeItem = NSMenuItem()
     private let hideSeekItem = NSMenuItem()
     private let sayItem = NSMenuItem()
     private let hideSeekHandler: (Bool) -> Void
@@ -83,11 +82,6 @@ final class StatusItemController {
         idleItem.target = self
         idleItem.action = #selector(togglePark)
         menu.addItem(idleItem)
-
-        pokeItem.title = "Poke"
-        pokeItem.target = self
-        pokeItem.action = #selector(poke)
-        menu.addItem(pokeItem)
 
         hideSeekItem.title = "Hide/Seek"
         hideSeekItem.target = self
@@ -203,12 +197,6 @@ final class StatusItemController {
     @objc private func togglePark() {
         isParked.toggle()
         parkHandler(isParked)
-        refreshCheckmarks()
-    }
-
-    @objc private func poke() {
-        isParked = false
-        parkHandler(false)
         refreshCheckmarks()
     }
 

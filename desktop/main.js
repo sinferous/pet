@@ -282,15 +282,6 @@ function getMenuTemplate() {
       }
     },
     {
-      label: 'Poke',
-      click: () => {
-        settings.isParked = false;
-        saveSettings();
-        sendToRenderer('menu-action', 'poke');
-        updateTrayMenu();
-      }
-    },
-    {
       label: 'Hide/Seek',
       type: 'checkbox',
       checked: settings.isHidden,

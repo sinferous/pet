@@ -93,20 +93,32 @@ final class PetSprite: SKSpriteNode {
 
         guard px >= 0, px < Int(texW), py >= 0, py < Int(texH) else { return 0 }
 
-        // Read alpha from underlying CGImage.
-        let cgImg = tex.cgImage()
-        guard let data = cgImg.dataProvider?.data,
-              let ptr = CFDataGetBytePtr(data) else { return 0 }
+        guard let cgImg = tex.cgImage() else { return 0 }
 
-        let bpp = cgImg.bitsPerPixel / 8
-        let bpr = cgImg.bytesPerRow
-        let offset = py * bpr + px * bpp
+        // Scale to CGImage's actual pixel dimensions (handles Retina/backing scale differences)
+        let sampleX = Int(round(CGFloat(px) * CGFloat(cgImg.width) / texW))
+        let sampleY = Int(round(CGFloat(py) * CGFloat(cgImg.height) / texH))
 
-        // Alpha is the last component in RGBA.
-        if bpp >= 4 {
-            return ptr[offset + 3]
-        } else {
-            return 255
-        }
+        guard sampleX >= 0, sampleX < cgImg.width,
+              sampleY >= 0, sampleY < cgImg.height else { return 0 }
+
+        // Draw 1x1 pixel into a known RGBA buffer to be 100% independent of CGImage byte-order / format
+        var pixel = [UInt8](repeating: 0, count: 4)
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(
+                  data: &pixel,
+                  width: 1,
+                  height: 1,
+                  bitsPerComponent: 8,
+                  bytesPerRow: 4,
+                  space: colorSpace,
+                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+              ) else { return 0 }
+
+        context.setBlendMode(.copy)
+        guard let cropped = cgImg.cropping(to: CGRect(x: sampleX, y: sampleY, width: 1, height: 1)) else { return 0 }
+        context.draw(cropped, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+
+        return pixel[3] // alpha is the 4th component in premultipliedLast (RGBA)
     }
 }

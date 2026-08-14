@@ -28,12 +28,27 @@ final class PetWindow: NSPanel {
 final class PetSKView: SKView {
     /// The SpriteKit scene provides pixel-level alpha for the current frame.
     var alphaProvider: ((_ windowPoint: NSPoint) -> UInt8)?
+    private var isTrackingDrag = false
+
+    override func mouseDown(with event: NSEvent) {
+        isTrackingDrag = true
+        super.mouseDown(with: event)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        isTrackingDrag = false
+        super.mouseUp(with: event)
+    }
 
     override func hitTest(_ point: NSPoint) -> NSView? {
+        if isTrackingDrag {
+            return super.hitTest(point)
+        }
+
         if let scene = self.scene {
             let scenePt = convert(point, to: scene)
-            let nodes = scene.nodes(at: scenePt)
-            if nodes.contains(where: { $0.name == "closeButton" || $0.parent?.name == "closeButton" }) {
+            if let closeNode = scene.childNode(withName: "//closeButton"),
+               closeNode.contains(scenePt) {
                 return super.hitTest(point)
             }
         }
