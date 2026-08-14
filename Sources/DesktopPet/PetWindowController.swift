@@ -169,6 +169,10 @@ final class PetWindowController {
     // MARK: - Frame tick (60 Hz from PetScene)
 
     private func tick() {
+        defer {
+            updateIgnoreMouseEvents()
+        }
+
         if scene.hasActiveSpeechBubble {
             // Keep the cat stationary while a speech bubble is active
             let targetY = baseWindowY
@@ -213,6 +217,25 @@ final class PetWindowController {
         let targetY = baseWindowY + yOffset
         if abs(window.frame.origin.y - targetY) > 0.1 {
             window.setFrameOrigin(NSPoint(x: window.frame.origin.x, y: targetY))
+        }
+    }
+
+    private func updateIgnoreMouseEvents() {
+        // If currently dragging or any mouse button is pressed, do not ignore mouse events.
+        if isDragging || NSEvent.pressedMouseButtons != 0 {
+            window.ignoresMouseEvents = false
+            return
+        }
+
+        let mouseLoc = NSEvent.mouseLocation // screen coordinates
+        let windowRect = window.frame
+        if windowRect.contains(mouseLoc) {
+            let winPt = NSPoint(x: mouseLoc.x - windowRect.origin.x,
+                                y: mouseLoc.y - windowRect.origin.y)
+            let interactive = scene.isPointInteractive(at: winPt)
+            window.ignoresMouseEvents = !interactive
+        } else {
+            window.ignoresMouseEvents = true
         }
     }
 

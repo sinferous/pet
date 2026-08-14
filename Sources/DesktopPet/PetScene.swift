@@ -433,6 +433,31 @@ final class PetScene: SKScene {
         return petSprite.alpha(at: windowPt, sceneSize: size)
     }
 
+    /// Checks if a point in window coordinates hits any interactive elements (pet sprite or speech bubble close button).
+    func isPointInteractive(at windowPt: NSPoint) -> Bool {
+        let scenePt = CGPoint(x: windowPt.x - size.width / 2, y: windowPt.y)
+        
+        // 1. Check if it's within the pet sprite's bounding box and has non-transparent alpha
+        let spriteFrame = petSprite.frame
+        if spriteFrame.contains(scenePt) {
+            let alpha = petSprite.alpha(at: windowPt, sceneSize: size)
+            if alpha >= 8 {
+                return true
+            }
+        }
+        
+        // 2. Check if it's within the close button of the active speech bubble
+        if let bubble = activeSpeechBubble,
+           let closeNode = bubble.childNode(withName: "closeButton") {
+            let bubblePt = bubble.convert(scenePt, from: self)
+            if closeNode.contains(bubblePt) {
+                return true
+            }
+        }
+        
+        return false
+    }
+
     // MARK: - Update loop
 
     override func update(_ currentTime: TimeInterval) {

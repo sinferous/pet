@@ -48,8 +48,11 @@ final class PetSKView: SKView {
         if let scene = self.scene {
             let scenePt = convert(point, to: scene)
             if let closeNode = scene.childNode(withName: "//closeButton"),
-               closeNode.contains(scenePt) {
-                return super.hitTest(point)
+               let bubble = closeNode.parent {
+                let bubblePt = bubble.convert(scenePt, from: scene)
+                if closeNode.contains(bubblePt) {
+                    return super.hitTest(point)
+                }
             }
         }
         
