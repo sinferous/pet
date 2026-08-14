@@ -93,7 +93,7 @@ final class PetSprite: SKSpriteNode {
 
         guard px >= 0, px < Int(texW), py >= 0, py < Int(texH) else { return 0 }
 
-        guard let cgImg = tex.cgImage() else { return 0 }
+        let cgImg = tex.cgImage()
 
         // Scale to CGImage's actual pixel dimensions (handles Retina/backing scale differences)
         let sampleX = Int(round(CGFloat(px) * CGFloat(cgImg.width) / texW))
