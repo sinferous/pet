@@ -176,10 +176,10 @@ function createWindow() {
 
   ipcMain.handle('get-screens', () => {
     return screen.getAllDisplays().map(display => ({
-      x: display.bounds.x,
-      y: display.bounds.y,
-      width: display.bounds.width,
-      height: display.bounds.height
+      x: display.workArea.x,
+      y: display.workArea.y,
+      width: display.workArea.width,
+      height: display.workArea.height
     }));
   });
 

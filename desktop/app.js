@@ -99,6 +99,9 @@ let screens = [];
 let facing = 'right';
 let walkTarget = null;
 const walkSpeed = 1.5;
+const runSpeed = 4.0;
+const rollSpeed = 1.5;
+let rollDir = 1;
 
 const animationFps = {
   idle: 2,
@@ -108,9 +111,9 @@ const animationFps = {
   drink: 3,
   play: 5,
   react: 4,
-  follow: 6,
-  jump: 9,
-  roll: 7,
+  laugh: 4,
+  jump: 6,
+  roll: 6,
   love: 4,
   anger: 2
 };
@@ -165,8 +168,7 @@ if (isElectron) {
     if (s && typeof s.stayAtBottom === 'boolean') {
       isStayAtBottom = s.stayAtBottom;
       if (isStayAtBottom && screens.length > 0) {
-        windowY = screens[0].maxY - petHeight;
-        updateWindowBounds();
+        behavior.enter(PetState.run); // run smoothly to the bottom floor instead of teleporting
       }
     }
   });
