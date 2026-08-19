@@ -733,8 +733,53 @@ function pokePet() {
   currentAnim = 'idle';
 }
 
-window.parkPet = parkPet;
-window.pokePet = pokePet;
+let isPromptDialogOpen = false;
+let promptCallback = null;
+
+function showPromptDialog(defaultValue, callback) {
+  const dialog = document.getElementById('promptDialog');
+  const input = document.getElementById('promptInput');
+  if (!dialog || !input) return;
+
+  input.value = defaultValue;
+  dialog.style.display = 'block';
+  isPromptDialogOpen = true;
+  promptCallback = callback;
+
+  behavior.setParked(true);
+
+  if (isElectron) {
+    ipcRenderer.send('set-ignore-mouse-events', false);
+  }
+}
+
+window.submitPromptDialog = () => {
+  const dialog = document.getElementById('promptDialog');
+  const input = document.getElementById('promptInput');
+  if (dialog && input) {
+    dialog.style.display = 'none';
+    isPromptDialogOpen = false;
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
+    if (promptCallback) {
+      promptCallback(input.value);
+      promptCallback = null;
+    }
+  }
+};
+
+window.cancelPromptDialog = () => {
+  const dialog = document.getElementById('promptDialog');
+  if (dialog) {
+    dialog.style.display = 'none';
+    isPromptDialogOpen = false;
+    if (!isManuallyParked) {
+      behavior.setParked(false);
+    }
+    promptCallback = null;
+  }
+};
 
 // Request notification permission in browser mode
 if (!isElectron && typeof Notification !== 'undefined' && Notification.requestPermission) {
