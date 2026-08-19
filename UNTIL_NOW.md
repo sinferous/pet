@@ -147,6 +147,7 @@ android/
 *   **Taskbar Floor Alignment (`winHeight = 320px`):** Updated window Y calculations to use `s.maxY - winHeight` (320px window offset) and `display.workArea` (usable space above taskbar). Luna now rests directly on top of the Windows taskbar in plain view, eliminating the bug where she sank off-screen.
 *   **Movement Loop Drivers:** Added `advanceWalk(runSpeed)` and `advanceRoll()` movement drivers to the main loop for `PetState.run` and `PetState.roll`.
 *   **Exhaustive Function & Particle Definitions:** Restored all particle, celebration, speech, and timer helper functions (`startLove`, `startCheer`, `startWoolBall`, `spawnConfettiBurst`, `spawnHeartEmoji`, `updateEffects`, `drawEffects`, `isPromptDialogOpen`, `scheduleWaterReminder`, etc.) into `desktop/app.js`, completely resolving runtime `ReferenceError` exception banners.
+*   **Speech Bubble Removal on Click/Shy:** Removed speech bubble triggers from `PetState.react`. Clicking or petting Luna plays the shy/blushing animation frame without displaying any text bubble.
 
 
 
