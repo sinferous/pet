@@ -177,7 +177,7 @@ if (isElectron) {
 function updateWindowBounds() {
   if (isStayAtBottom && screens.length > 0) {
     let s = screens.find(scr => scr.contains(windowX, windowY)) || screens[0];
-    windowY = s.maxY - petHeight;
+    windowY = s.maxY - winHeight;
   }
 
   let yOffset = 0;
@@ -330,9 +330,9 @@ window.addEventListener('mousemove', async (e) => {
   if (s) {
     windowX = Math.max(s.minX, Math.min(s.maxX - petWidth, windowX));
     if (isStayAtBottom) {
-      windowY = s.maxY - petHeight;
+      windowY = s.maxY - winHeight;
     } else {
-      windowY = Math.max(s.minY, Math.min(s.maxY - petHeight, windowY));
+      windowY = Math.max(s.minY, Math.min(s.maxY - winHeight, windowY));
     }
   }
   updateWindowBounds();
@@ -705,7 +705,7 @@ function triggerWaterHydrationFlow() {
   if (screens.length === 0) return;
   const s = screens[0];
   const targetX = s.minX + (s.width - petWidth) / 2;
-  const targetY = isStayAtBottom ? s.maxY - petHeight : s.minY + (s.height - petHeight) / 2;
+  const targetY = isStayAtBottom ? s.maxY - winHeight : s.minY + (s.height - winHeight) / 2;
   hydrationWalkTarget = { x: targetX, y: targetY };
   currentAnim = 'run';
   currentFrameIndex = 0;
@@ -719,7 +719,7 @@ let isManuallyParked = false;
 function parkPet() {
   if (screens.length === 0) return;
   const s = screens[0];
-  parkWalkTarget = { x: s.minX + 12, y: s.maxY - petHeight };
+  parkWalkTarget = { x: s.minX + 12, y: s.maxY - winHeight };
   behavior.setParked(true);
   walkTarget = null;
   currentAnim = 'walk';
@@ -888,7 +888,7 @@ function triggerCustomReminder(message) {
   const s = screens[0];
   
   const targetX = s.minX + (s.width - petWidth) / 2;
-  const targetY = isStayAtBottom ? s.maxY - petHeight : s.minY + (s.height - petHeight) / 2 - 100;
+  const targetY = isStayAtBottom ? s.maxY - winHeight : s.minY + (s.height - winHeight) / 2 - 100;
   
   hydrationWalkTarget = { x: targetX, y: targetY };
   behavior.setParked(true);   // freeze machine decisions
