@@ -13,9 +13,6 @@ if (isElectron) {
   document.body.classList.add('browser-mode');
 }
 
-// Access behavior objects directly since they are already declared in the script scope
-// const { PetState, PetAnimation, BehaviorMachine, ScreenNavigator, ScreenRect } = window;
-
 const canvas = document.getElementById('petCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 const container = document.getElementById('petContainer');
@@ -79,7 +76,6 @@ function preloadImages(callback) {
       };
       img.onerror = (err) => {
         console.error(`Failed to load image: artwork/${anim}/${i}.svg`, err);
-        // Show loading error on the window console/screen if applicable
         const banner = document.getElementById('error-banner');
         if (banner) {
           banner.style.display = 'block';
@@ -140,14 +136,12 @@ async function initScreens() {
     const displays = await ipcRenderer.invoke('get-screens');
     screens = displays.map(d => new ScreenRect(d.x, d.y, d.width, d.height));
   } else {
-    // Single monitor simulated by browser window size
     screens = [new ScreenRect(0, 0, window.innerWidth, window.innerHeight)];
     window.addEventListener('resize', () => {
       screens[0] = new ScreenRect(0, 0, window.innerWidth, window.innerHeight);
     });
   }
 
-  // Set initial position: center of primary screen
   if (screens.length > 0) {
     const s = screens[0];
     windowX = s.minX + (s.width - petWidth) / 2;
@@ -168,7 +162,7 @@ if (isElectron) {
     if (s && typeof s.stayAtBottom === 'boolean') {
       isStayAtBottom = s.stayAtBottom;
       if (isStayAtBottom && screens.length > 0) {
-        behavior.enter(PetState.run); // run smoothly to the bottom floor instead of teleporting
+        behavior.enter(PetState.run);
       }
     }
   });
@@ -183,9 +177,9 @@ function updateWindowBounds() {
   let yOffset = 0;
   if (currentAnim === 'jump') {
     if (currentFrameIndex === 1) {
-      yOffset = -70; // High peak jump offset
+      yOffset = -70;
     } else if (currentFrameIndex === 2) {
-      yOffset = -35; // Lower landing offset
+      yOffset = -35;
     }
   }
 
@@ -197,7 +191,6 @@ function updateWindowBounds() {
   }
 }
 
-// Ticks walk progress
 function startWalk() {
   if (screens.length === 0) return;
   walkTarget = ScreenNavigator.pickTarget(screens, 40, petWidth, petHeight, 0, isStayAtBottom);
@@ -234,7 +227,8 @@ function advanceRoll() {
   updateWindowBounds();
 }
 
-// Ticks cursor follow behavior
+let followSprinting = false;
+
 async function advanceFollow() {
   let mouse;
   if (isElectron) {
@@ -245,7 +239,9 @@ async function advanceFollow() {
 
   const targetX = mouse.x - petWidth / 2;
   const dx = targetX - windowX;
-  const maxStep = walkSpeed * 1.5;
+  const dist = Math.abs(dx);
+  followSprinting = dist > 250;
+  const maxStep = followSprinting ? runSpeed : walkSpeed * 1.5;
   const clampedDx = Math.max(-maxStep, Math.min(maxStep, dx));
 
   if (Math.abs(dx) > 2) {
@@ -253,19 +249,16 @@ async function advanceFollow() {
   }
 
   windowX += clampedDx;
-
   updateWindowBounds();
 }
 
 let wasPressedOnCat = false;
 
-// Drag & Drop
 container.addEventListener('mousedown', async (e) => {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
-  // Inspect alpha to ensure we clicked on the pet body (with fallback for Chrome local file CORS restrictions)
   let alpha = 255;
   try {
     const pixel = ctx.getImageData(x, y, 1, 1).data;
@@ -278,7 +271,7 @@ container.addEventListener('mousedown', async (e) => {
 
   if (alpha < 4) {
     wasPressedOnCat = false;
-    return; // ignore transparent clicks
+    return;
   }
 
   if (e.button === 2) {
@@ -293,6 +286,7 @@ container.addEventListener('mousedown', async (e) => {
   isDragging = true;
   if (isElectron) {
     ipcRenderer.send('set-dragging', true);
+    ipcRenderer.send('set-ignore-mouse-events', false);
   }
   behavior.handleDragStart();
 
@@ -322,7 +316,6 @@ window.addEventListener('mousemove', async (e) => {
   windowX = mouseX - dragOffsetX;
   windowY = mouseY - dragOffsetY;
 
-  // Clamp pet to remain entirely inside the active monitor bounds
   let s = screens.find(scr => scr.contains(mouseX, mouseY));
   if (!s && screens.length > 0) {
     s = screens[0];
@@ -339,9 +332,7 @@ window.addEventListener('mousemove', async (e) => {
 });
 
 window.addEventListener('mouseup', () => {
-  if (!wasPressedOnCat) {
-    return; // ignore clicks that did not start on the cat
-  }
+  if (!wasPressedOnCat) return;
   wasPressedOnCat = false;
 
   if (!isDragging) {
@@ -356,7 +347,6 @@ window.addEventListener('mouseup', () => {
     if (isManuallyParked) {
       parkPet();
     } else {
-      // Keep the current height instead of snapping to floor
       updateWindowBounds();
     }
   }
@@ -369,7 +359,6 @@ window.addEventListener('contextmenu', (e) => {
   }
 });
 
-// Hit-testing transparency (only relevant in Electron)
 function handleMouseMove(e) {
   if (isDragging || !isElectron) return;
 
@@ -417,48 +406,6 @@ function handleMouseMove(e) {
 
 if (isElectron) {
   window.addEventListener('mousemove', handleMouseMove);
-  
-  // Handle Linux global cursor polling to toggle click-through ignore shape
-  ipcRenderer.on('check-mouse-position', (event, pos) => {
-    if (isDragging) {
-      ipcRenderer.send('set-ignore-mouse-events', false);
-      return;
-    }
-    
-    if (typeof isPromptDialogOpen !== 'undefined' && isPromptDialogOpen) {
-      ipcRenderer.send('set-ignore-mouse-events', false);
-      return;
-    }
-    
-    const closeEl = document.getElementById('speechBubbleClose');
-    const hoveredEl = document.elementFromPoint(pos.x, pos.y);
-    const isOverCloseBtn = closeEl && hoveredEl && (closeEl === hoveredEl || closeEl.contains(hoveredEl));
-    
-    if (isOverCloseBtn) {
-      ipcRenderer.send('set-ignore-mouse-events', false);
-      return;
-    }
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = pos.x - rect.left;
-    const y = pos.y - rect.top;
-    
-    if (x >= 0 && x < petWidth && y >= headroom && y < winHeight) {
-      let alpha = 255;
-      try {
-        const pixel = ctx.getImageData(x, y, 1, 1).data;
-        alpha = pixel[3];
-      } catch (err) {
-        if (x < 15 || x > 113 || y < headroom + 15 || y > winHeight - 5) {
-          alpha = 0;
-        }
-      }
-      const ignore = alpha < 4;
-      ipcRenderer.send('set-ignore-mouse-events', ignore);
-    } else {
-      ipcRenderer.send('set-ignore-mouse-events', true);
-    }
-  });
 }
 
 const waterSentences = [
@@ -521,7 +468,7 @@ function triggerWaterReminderBubble() {
 }
 
 window.closeSpeechBubble = (event) => {
-  if (event) event.stopPropagation(); // prevent drag trigger
+  if (event) event.stopPropagation();
   const bubble = document.getElementById('speechBubble');
   if (bubble) {
     bubble.style.display = 'none';
@@ -532,28 +479,177 @@ window.closeSpeechBubble = (event) => {
       parkPet();
     } else {
       behavior.setParked(false);
-      behavior.enter(PetState.run); // run somewhere else immediately!
+      behavior.enter(PetState.run);
     }
   }
 };
 
 function triggerRandomMeow() {
-  // Disabled as per user request
+  const bubble = document.getElementById('speechBubble');
+  if (bubble && bubble.style.display === 'block') return;
+
+  const idx = Math.floor(Math.random() * catVoices.length);
+  showSpeechBubble(catVoices[idx], false);
 }
 
 function showSayBubble() {
-  // Only show if not currently showing a bubble
   const bubble = document.getElementById('speechBubble');
   if (bubble && bubble.style.display === 'block') return;
-  showSpeechBubble("Sathya Sathya", 4000);
+  showSpeechBubble("Sathya Sathya", false);
 }
 
 window.showSayBubble = showSayBubble;
 
+// Particle & Celebration effects (cheer, love, wool ball)
+const rollColors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f45', '#c77dff', '#ff5d8f'];
+let confetti = [];
+let heartEmojis = [];
+let woolBall = null;
+
+function spawnConfettiBurst(count) {
+  for (let i = 0; i < count; i++) {
+    confetti.push({
+      x: petWidth / 2 + (Math.random() - 0.5) * petWidth,
+      y: headroom + petHeight * (0.25 + Math.random() * 0.55),
+      vx: (Math.random() - 0.5) * 280,
+      vy: -(Math.random() * 220 + 60),
+      w: 4 + Math.random() * 4,
+      h: 6 + Math.random() * 5,
+      color: rollColors[Math.floor(Math.random() * rollColors.length)],
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 12,
+      life: 0.8 + Math.random() * 1.4
+    });
+  }
+}
+
+function spawnHeartEmoji(count) {
+  for (let i = 0; i < count; i++) {
+    heartEmojis.push({
+      x: petWidth * (0.15 + Math.random() * 0.7),
+      y: headroom + petHeight * (0.15 + Math.random() * 0.4),
+      vx: (Math.random() - 0.5) * 26,
+      vy: -(16 + Math.random() * 26),
+      size: 5 + Math.random() * 7,
+      life: 1.2 + Math.random() * 1.1,
+      wobble: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function startCheer() {
+  confetti = [];
+  spawnConfettiBurst(48);
+}
+
+function startLove() {
+  heartEmojis = [];
+  spawnHeartEmoji(7);
+}
+
+function startWoolBall() {
+  woolBall = {
+    x: petWidth / 2,
+    y: headroom + petHeight * 0.4,
+    vx: (Math.random() > 0.5 ? 1 : -1) * (140 + Math.random() * 80),
+    vy: -(120 + Math.random() * 60),
+    r: 10,
+    rot: 0
+  };
+}
+
+function updateEffects(dt) {
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const p = confetti[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 320 * dt;
+    p.rot += p.vr * dt;
+    p.life -= dt;
+    if (p.life <= 0 || p.y > winHeight + 10) {
+      confetti.splice(i, 1);
+    }
+  }
+
+  for (let i = heartEmojis.length - 1; i >= 0; i--) {
+    const h = heartEmojis[i];
+    h.y += h.vy * dt;
+    h.wobble += dt * 5;
+    h.x += Math.sin(h.wobble) * 20 * dt;
+    h.life -= dt;
+    if (h.life <= 0) {
+      heartEmojis.splice(i, 1);
+    }
+  }
+
+  if (woolBall) {
+    const b = woolBall;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    b.vy += 400 * dt;
+    b.rot += (b.vx / b.r) * dt;
+
+    if (b.x - b.r < 0) {
+      b.x = b.r;
+      b.vx = Math.abs(b.vx) * 0.85;
+    } else if (b.x + b.r > petWidth) {
+      b.x = petWidth - b.r;
+      b.vx = -Math.abs(b.vx) * 0.85;
+    }
+
+    const floorY = headroom + petHeight - b.r;
+    if (b.y > floorY) {
+      b.y = floorY;
+      b.vy = -Math.abs(b.vy) * 0.75;
+      b.vx *= 0.95;
+    }
+  }
+}
+
+function drawEffects(ctx) {
+  confetti.forEach(p => {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+    ctx.restore();
+  });
+
+  heartEmojis.forEach(h => {
+    ctx.save();
+    ctx.font = `${h.size * 2}px sans-serif`;
+    ctx.fillStyle = '#ff4d4d';
+    ctx.fillText('❤️', h.x, h.y);
+    ctx.restore();
+  });
+
+  if (woolBall) {
+    const b = woolBall;
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.rot);
+    ctx.beginPath();
+    ctx.arc(0, 0, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#e8590c';
+    ctx.fill();
+    ctx.strokeStyle = '#c2255c';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.strokeStyle = '#ff922b';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(0, 0, b.r * 0.8, i * Math.PI / 3, i * Math.PI / 3 + Math.PI * 0.8);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
 // State transition callback
 behavior.onStateChange = (state) => {
   currentAnim = state === PetState.follow ? 'walk' : state;
-  // cheer reuses the love sprites to keep it static; woolball reuses the play sprites
   if (state === PetState.cheer) {
     currentAnim = 'love';
   } else if (state === PetState.woolball) {
@@ -563,13 +659,13 @@ behavior.onStateChange = (state) => {
   animTime = 0;
 
   if (state === PetState.cheer) {
-    startCheer();         // burst of confetti
+    startCheer();
   } else if (state === PetState.love) {
-    startLove();          // heart emojis around the cat
+    startLove();
   } else if (state === PetState.woolball) {
-    startWoolBall();      // spawn the bouncing wool ball
+    startWoolBall();
   } else {
-    woolBall = null;      // stop the wool ball when not playing with it
+    woolBall = null;
   }
 
   if (state === PetState.walk || state === PetState.run) {
@@ -587,7 +683,9 @@ behavior.onStateChange = (state) => {
       pendingCustomReminderMessage = null;
     }
   } else if (state === PetState.react) {
-    // React state plays animation but has no voice bubbles as requested
+    const reacts = ["Purrrrr...", "Prrrr! ❤️", "Mrrrp! ♪", "Meow~", "Purrrrrr..."];
+    const idx = Math.floor(Math.random() * reacts.length);
+    showSpeechBubble(reacts[idx], false);
   }
 };
 
@@ -610,7 +708,6 @@ function loop(now) {
     behavior.tick();
 
     if (hydrationWalkTarget) {
-      // Running to center
       const step = ScreenNavigator.step(windowX, windowY, hydrationWalkTarget.x, hydrationWalkTarget.y, walkSpeed * 2.5, screens, petWidth, petHeight);
       facing = step.facing;
       windowX = step.x;
@@ -626,7 +723,6 @@ function loop(now) {
         }
       }
     } else if (parkWalkTarget) {
-      // Strolling to park corner (bottom-left)
       const step = ScreenNavigator.step(windowX, windowY, parkWalkTarget.x, parkWalkTarget.y, walkSpeed * 1.5, screens, petWidth, petHeight);
       facing = step.facing;
       windowX = step.x;
@@ -643,23 +739,27 @@ function loop(now) {
       advanceWalk(runSpeed);
     } else if (behavior.state === PetState.roll) {
       advanceRoll();
+    } else if (behavior.state === PetState.cheer) {
+      if (Math.random() < dt * 10) spawnConfettiBurst(2);
+    } else if (behavior.state === PetState.woolball) {
+      if (woolBall) facing = woolBall.x < petWidth / 2 ? 'left' : 'right';
     } else if (behavior.state === PetState.follow) {
       advanceFollow();
     } else if (behavior.state === PetState.idle) {
-      // Proximity check in browser-mode (in Electron it is monitored globally in main.js)
       if (!isElectron) {
         const dx = browserMousePos.x - (windowX + petWidth / 2);
-        const dy = browserMousePos.y - (windowY + petHeight / 2);
+        const dy = browserMousePos.y - (windowY + headroom + petHeight / 2);
         const dist = Math.sqrt(dx * dx + dy * dy);
         behavior.setCursor(dist < 80);
       }
     }
   }
 
-  // Play Animation
+  updateEffects(dt);
+
   const fps = animationFps[behavior.state] || 2;
   animTime += dt;
-  const animKey = currentAnim === 'follow' ? 'walk' : currentAnim;
+  const animKey = currentAnim === 'follow' ? (followSprinting ? 'run' : 'walk') : currentAnim;
   const frames = images[animKey] || [];
 
   if (frames.length > 0) {
@@ -677,10 +777,9 @@ function loop(now) {
     ctx.drawImage(img, 0, headroom, petWidth, petHeight);
     ctx.restore();
 
-    // Draw Zzz overlay for Sleep (after restore, so it is never inverted)
     if (behavior.state === PetState.sleep) {
       ctx.save();
-      ctx.fillStyle = '#010101'; // match the black outlines of the cat
+      ctx.fillStyle = '#010101';
       ctx.font = 'bold 20px monospace';
       
       const bobZ = Math.sin(animTime * 3.5) * 3.5;
@@ -694,6 +793,7 @@ function loop(now) {
     }
   }
 
+  drawEffects(ctx);
   updateWindowBounds();
 
   requestAnimationFrame(loop);
@@ -734,6 +834,9 @@ function pokePet() {
   isManuallyParked = false;
   currentAnim = 'idle';
 }
+
+window.parkPet = parkPet;
+window.pokePet = pokePet;
 
 let isPromptDialogOpen = false;
 let promptCallback = null;
@@ -783,14 +886,12 @@ window.cancelPromptDialog = () => {
   }
 };
 
-// Request notification permission in browser mode
 if (!isElectron && typeof Notification !== 'undefined' && Notification.requestPermission) {
   Notification.requestPermission().catch(err => {
     console.log('Notification permission request ignored or blocked', err);
   });
 }
 
-// Keyboard Shortcut for testing water drink reminder instantly
 window.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 'w') {
     console.log('Mocking water reminder...');
@@ -803,6 +904,7 @@ window.triggerState = (stateName) => {
   if (stateName === 'drink') {
     triggerWaterHydrationFlow();
   } else {
+    isManuallyParked = false;
     behavior.enter(stateName);
   }
 };
@@ -828,9 +930,9 @@ window.showReminderDialog = () => {
   if (dialog) {
     dialog.style.display = 'block';
     isReminderDialogOpen = true;
-    behavior.setParked(true); // pause pet while typing
-    walkTarget = null; // stop any active walk!
-    currentAnim = 'idle'; // reset to idle animation!
+    behavior.setParked(true);
+    walkTarget = null;
+    currentAnim = 'idle';
     if (isElectron) {
       ipcRenderer.send('set-ignore-mouse-events', false);
     }
@@ -853,7 +955,6 @@ window.submitReminderDialog = () => {
     let time = timeInput.value.trim();
     const msg = msgInput.value.trim();
     if (time && msg) {
-      // Normalize time format (e.g. "6:20" -> "06:20")
       const parts = time.split(':');
       if (parts.length === 2) {
         const hr = parts[0].trim().padStart(2, '0');
@@ -891,13 +992,22 @@ function triggerCustomReminder(message) {
   const targetY = isStayAtBottom ? s.maxY - winHeight : s.minY + (s.height - winHeight) / 2 - 100;
   
   hydrationWalkTarget = { x: targetX, y: targetY };
-  behavior.setParked(true);   // freeze machine decisions
+  behavior.setParked(true);
   currentAnim = 'run';
   currentFrameIndex = 0;
   animTime = 0;
 }
 
-// Custom Reminders polling loop (every 10 seconds)
+let waterIntervalMinutes = 60;
+let waterTimer = null;
+
+function scheduleWaterReminder() {
+  if (waterTimer) clearInterval(waterTimer);
+  waterTimer = setInterval(() => {
+    triggerWaterHydrationFlow();
+  }, waterIntervalMinutes * 60 * 1000);
+}
+
 setInterval(() => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, '0');
@@ -912,9 +1022,15 @@ setInterval(() => {
   });
 }, 10000);
 
-// Force the cat to walk/run to a random position every 1 minute
 setInterval(() => {
-  // Ignore if busy, dragging, settings dialog open, or showing a water reminder
+  if (behavior.state === PetState.idle || behavior.state === PetState.walk) {
+    if (Math.random() < 0.35) {
+      triggerRandomMeow();
+    }
+  }
+}, 10000);
+
+setInterval(() => {
   if (hydrationWalkTarget || isPromptDialogOpen || isReminderDialogOpen || isDragging || isWaterReminderActive || isManuallyParked) return;
   const state = Math.random() < 0.5 ? PetState.walk : PetState.run;
   behavior.enter(state);
@@ -934,6 +1050,33 @@ if (isElectron) {
       showReminderDialog();
     }
   });
+
+  ipcRenderer.on('toggle-water-reminders', (event, enabled) => {
+    if (enabled) {
+      scheduleWaterReminder();
+    } else {
+      if (waterTimer) clearInterval(waterTimer);
+      waterTimer = null;
+    }
+  });
+
+  ipcRenderer.on('prompt-hydration-interval', (event) => {
+    const input = document.getElementById('waterIntervalInput');
+    const currentVal = input ? input.value : String(waterIntervalMinutes);
+    showPromptDialog(currentVal, (result) => {
+      if (result !== null) {
+        const parsed = parseInt(result, 10);
+        if (!isNaN(parsed)) {
+          const minutes = Math.max(1, Math.min(1440, parsed));
+          waterIntervalMinutes = minutes;
+          if (input) input.value = String(minutes);
+          
+          ipcRenderer.send('update-settings', { waterIntervalMinutes: minutes });
+          scheduleWaterReminder();
+        }
+      }
+    });
+  });
 }
 
 // Start Application
@@ -942,6 +1085,20 @@ preloadImages(() => {
     if (isElectron) {
       const cp = document.getElementById('controlPanel');
       if (cp) cp.style.display = 'none';
+
+      ipcRenderer.invoke('get-settings').then((settings) => {
+        if (settings) {
+          if (typeof settings.waterIntervalMinutes === 'number') {
+            waterIntervalMinutes = settings.waterIntervalMinutes;
+          }
+          if (settings.waterReminders) {
+            scheduleWaterReminder();
+          }
+          if (settings.isParked) {
+            parkPet();
+          }
+        }
+      });
     }
     requestAnimationFrame(loop);
   });
