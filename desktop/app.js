@@ -199,16 +199,16 @@ function startWalk() {
   walkTarget = ScreenNavigator.pickTarget(screens, 40, petWidth, petHeight, 0, isStayAtBottom);
 }
 
-function advanceWalk() {
+function advanceWalk(speed = walkSpeed) {
   if (!walkTarget) return;
 
-  const step = ScreenNavigator.step(windowX, windowY, facing, walkSpeed, screens, petWidth, petHeight);
+  const step = ScreenNavigator.step(windowX, windowY, walkTarget.x, walkTarget.y, speed, screens, petWidth, petHeight);
   facing = step.facing;
   windowX = step.x;
   windowY = step.y;
   updateWindowBounds();
 
-  if (Math.abs(windowX - walkTarget.x) < walkSpeed * 2) {
+  if (Math.hypot(windowX - walkTarget.x, windowY - walkTarget.y) < speed * 1.5) {
     walkTarget = null;
     behavior.completeWalk();
   }
