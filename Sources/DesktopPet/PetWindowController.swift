@@ -34,6 +34,22 @@ final class PetWindowController {
     private var dragOffset: NSPoint = .zero
     private var baseWindowY: CGFloat = 0
     private var isManuallyParked = false
+    private var isStayAtBottom = false
+
+    func setStayAtBottom(_ stay: Bool) {
+        isStayAtBottom = stay
+        if stay {
+            let screens = ScreenAdapter.screenRects()
+            if !screens.isEmpty {
+                let s = screens[0]
+                baseWindowY = CGFloat(s.minY)
+                window.setFrameOrigin(NSPoint(x: window.frame.origin.x, y: baseWindowY))
+            }
+            if behavior.state == .walk || behavior.state == .run {
+                startWalk()
+            }
+        }
+    }
 
     // ── Constants ──
     private let petScale: CGFloat = 8.0   // 16px sprite → 128pt on screen
@@ -81,6 +97,7 @@ final class PetWindowController {
         scene.onCloseSpeechBubble = { [weak self] in
             guard let self else { return }
             self.isHydrating = false
+            self.hydrationWalkTarget = nil
             if self.isManuallyParked {
                 self.park()
             } else {
@@ -240,8 +257,8 @@ final class PetWindowController {
     }
 
     private func updateIgnoreMouseEvents() {
-        // If currently dragging or any mouse button is pressed, do not ignore mouse events.
-        if isDragging || NSEvent.pressedMouseButtons != 0 {
+        // If currently dragging, keep window capturing mouse events.
+        if isDragging {
             window.ignoresMouseEvents = false
             return
         }
@@ -263,7 +280,7 @@ final class PetWindowController {
     private func startWalk() {
         let screens = ScreenAdapter.screenRects()
         guard !screens.isEmpty else { return }
-        guard let target = ScreenNavigator.pickTarget(screens: screens, margin: Double(margin), winWidth: Double(winWidth), petHeight: Double(petHeight)) else { return }
+        guard let target = ScreenNavigator.pickTarget(screens: screens, margin: Double(margin), winWidth: Double(winWidth), petHeight: Double(petHeight), stayAtBottom: isStayAtBottom) else { return }
         walkTarget = target
     }
 
@@ -326,8 +343,10 @@ final class PetWindowController {
     /// screen, then freeze it there. The state machine is parked, so the cat
     /// does not wander, follow, or fall asleep.
     func park() {
-        guard let screen = NSScreen.main else { return }
-        parkWalkTarget = (x: Double(screen.frame.minX) + 12, y: Double(screen.frame.minY))
+        let screen = NSScreen.main ?? NSScreen.screens.first
+        let minX = screen?.frame.minX ?? 0
+        let minY = screen?.frame.minY ?? 0
+        parkWalkTarget = (x: Double(minX) + 12, y: Double(minY))
         behavior.setParked(true)
         walkTarget = nil
         isManuallyParked = true
@@ -340,6 +359,8 @@ final class PetWindowController {
         parkWalkTarget = nil
         isManuallyParked = false
         behavior.setParked(false)
+        let idleFrames = PixelPetGenerator.frames(for: .idle)
+        scene.play(animation: .idle, frames: idleFrames)
     }
 
     /// Steers the cat diagonally toward the park corner. The machine is frozen
@@ -351,7 +372,7 @@ final class PetWindowController {
         let dy = target.y - curY
         let len = (dx * dx + dy * dy).squareRoot()
         if len > 0 {
-            let s = min(walkSpeed, len)
+            let s = min(walkSpeed * 1.5, len)
             window.setFrameOrigin(NSPoint(x: curX + dx / len * s,
                                           y: curY + dy / len * s))
             facing = dx >= 0 ? .right : .left
@@ -416,7 +437,7 @@ final class PetWindowController {
         let s = screens[0]
         
         let targetX = s.minX + (s.width - Double(winWidth)) / 2
-        let targetY = s.minY + (s.height - Double(winHeight)) / 2 - 100
+        let targetY = isStayAtBottom ? s.minY : s.minY + (s.height - Double(winHeight)) / 2 - 100
         
         hydrationWalkTarget = (x: targetX, y: targetY)
         
@@ -433,7 +454,7 @@ final class PetWindowController {
         let s = screens[0]
         
         let targetX = s.minX + (s.width - Double(winWidth)) / 2
-        let targetY = s.minY + (s.height - Double(winHeight)) / 2 - 100
+        let targetY = isStayAtBottom ? s.minY : s.minY + (s.height - Double(winHeight)) / 2 - 100
         
         hydrationWalkTarget = (x: targetX, y: targetY)
         
@@ -466,7 +487,11 @@ final class PetWindowController {
             if idx < screens.count {
                 let s = screens[idx]
                 newX = max(CGFloat(s.minX), min(CGFloat(s.maxX) - winWidth, newX))
-                newY = max(CGFloat(s.minY), min(CGFloat(s.maxY) - winHeight, newY))
+                if isStayAtBottom {
+                    newY = CGFloat(s.minY)
+                } else {
+                    newY = max(CGFloat(s.minY), min(CGFloat(s.maxY) - winHeight, newY))
+                }
             }
         }
         window.setFrameOrigin(NSPoint(x: newX, y: newY))

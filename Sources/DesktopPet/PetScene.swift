@@ -438,10 +438,10 @@ final class PetScene: SKScene {
         let scenePt = CGPoint(x: windowPt.x - size.width / 2, y: windowPt.y)
         
         // 1. Check if it's within the pet sprite's bounding box and has non-transparent alpha
-        let spriteFrame = petSprite.frame
+        let spriteFrame = petSprite.frame.insetBy(dx: -4, dy: -4)
         if spriteFrame.contains(scenePt) {
             let alpha = petSprite.alpha(at: windowPt, sceneSize: size)
-            if alpha >= 8 {
+            if alpha >= 4 {
                 return true
             }
         }
@@ -450,7 +450,7 @@ final class PetScene: SKScene {
         if let bubble = activeSpeechBubble,
            let closeNode = bubble.childNode(withName: "closeButton") {
             let bubblePt = bubble.convert(scenePt, from: self)
-            if closeNode.contains(bubblePt) {
+            if closeNode.frame.insetBy(dx: -6, dy: -6).contains(bubblePt) {
                 return true
             }
         }
@@ -471,6 +471,16 @@ final class PetScene: SKScene {
 
     override func mouseDown(with event: NSEvent) {
         let scenePt = event.location(in: self)
+        if let bubble = activeSpeechBubble,
+           let closeNode = bubble.childNode(withName: "closeButton") {
+            let bubblePt = bubble.convert(scenePt, from: self)
+            if closeNode.frame.insetBy(dx: -6, dy: -6).contains(bubblePt) {
+                activeSpeechBubble?.removeFromParent()
+                activeSpeechBubble = nil
+                onCloseSpeechBubble?()
+                return
+            }
+        }
         let clickedNodes = nodes(at: scenePt)
         if clickedNodes.contains(where: { $0.name == "closeButton" || $0.parent?.name == "closeButton" }) {
             activeSpeechBubble?.removeFromParent()

@@ -20,11 +20,13 @@ final class StatusItemController {
     private let waterItem = NSMenuItem()
     private let intervalItem = NSMenuItem()
     private let autoStartItem = NSMenuItem()
+    private let stayAtBottomItem = NSMenuItem()
     private let idleItem = NSMenuItem()
     private let hideSeekItem = NSMenuItem()
     private let sayItem = NSMenuItem()
     private let hideSeekHandler: (Bool) -> Void
     private let customReminderHandler: () -> Void
+    private let stayAtBottomHandler: (Bool) -> Void
 
     init(settings: SettingsStore,
          sleepPreventer: SleepPreventer,
@@ -34,7 +36,8 @@ final class StatusItemController {
          parkHandler: @escaping (Bool) -> Void,
          sayHandler: @escaping () -> Void,
          hideSeekHandler: @escaping (Bool) -> Void,
-         customReminderHandler: @escaping () -> Void) {
+         customReminderHandler: @escaping () -> Void,
+         stayAtBottomHandler: @escaping (Bool) -> Void) {
         self.settings = settings
         self.sleepPreventer = sleepPreventer
         self.autoStart = autoStart
@@ -44,6 +47,7 @@ final class StatusItemController {
         self.sayHandler = sayHandler
         self.hideSeekHandler = hideSeekHandler
         self.customReminderHandler = customReminderHandler
+        self.stayAtBottomHandler = stayAtBottomHandler
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
@@ -78,7 +82,14 @@ final class StatusItemController {
         autoStartItem.action = #selector(toggleAutoStart)
         menu.addItem(autoStartItem)
 
-        idleItem.title = "Idle (Park)"
+        menu.addItem(.separator())
+
+        stayAtBottomItem.title = "Stay at Bottom"
+        stayAtBottomItem.target = self
+        stayAtBottomItem.action = #selector(toggleStayAtBottom)
+        menu.addItem(stayAtBottomItem)
+
+        idleItem.title = "Idle / Free"
         idleItem.target = self
         idleItem.action = #selector(togglePark)
         menu.addItem(idleItem)
@@ -201,6 +212,12 @@ final class StatusItemController {
         refreshCheckmarks()
     }
 
+    @objc private func toggleStayAtBottom() {
+        settings.stayAtBottom.toggle()
+        stayAtBottomHandler(settings.stayAtBottom)
+        refreshCheckmarks()
+    }
+
     @objc private func toggleHideSeek() {
         isHidden.toggle()
         hideSeekHandler(isHidden)
@@ -256,6 +273,7 @@ final class StatusItemController {
         sleepItem.state = settings.sleepPrevention ? .on : .off
         waterItem.state = settings.waterReminders ? .on : .off
         autoStartItem.state = autoStart.isEnabled ? .on : .off
+        stayAtBottomItem.state = settings.stayAtBottom ? .on : .off
         idleItem.state = isParked ? .on : .off
         hideSeekItem.state = isHidden ? .on : .off
         intervalItem.title = "Hydration Interval… (\(settings.waterIntervalMinutes) min)"

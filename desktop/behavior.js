@@ -295,20 +295,19 @@ class BehaviorMachine {
 const ScreenNavigator = {
   adjacencyTolerance: 4.0,
 
-  pickTarget(screens, margin = 40, winWidth = 128, winHeight = 120, headroom = 0) {
+  pickTarget(screens, margin = 40, winWidth = 128, winHeight = 120, headroom = 0, stayAtBottom = false) {
     if (screens.length === 0) return null;
     const index = Math.floor(Math.random() * screens.length);
     const screen = screens[index];
-    // Random point ANYWHERE on the display (x,y = top-left of the pet window).
-    // The window may extend up off the top by `headroom` (effects zone), but the
-    // cat itself (headroom below the window top) always stays fully on-screen,
-    // so it can still roam right up to the top of the display.
     const insetX = Math.min(margin, screen.width / 4);
     const insetY = Math.min(margin, screen.height / 4);
     const rangeX = screen.width - insetX * 2 - winWidth;
     const rangeY = screen.height - insetY * 2 - winHeight + headroom;
     const x = rangeX > 0 ? screen.minX + insetX + Math.random() * rangeX : screen.centerX;
-    const y = rangeY > 0 ? screen.minY - headroom + insetY + Math.random() * rangeY : screen.minY - headroom;
+    let y = rangeY > 0 ? screen.minY - headroom + insetY + Math.random() * rangeY : screen.minY - headroom;
+    if (stayAtBottom) {
+      y = screen.maxY - winHeight;
+    }
     return {
       screenIndex: index,
       x: x,

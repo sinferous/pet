@@ -16,7 +16,8 @@ let settings = {
   waterIntervalMinutes: 60,
   autoStart: true,
   isParked: false,
-  isHidden: false
+  isHidden: false,
+  stayAtBottom: false
 };
 
 function loadSettings() {
@@ -271,13 +272,24 @@ function getMenuTemplate() {
     },
     { type: 'separator' },
     {
-      label: 'Idle (Park)',
+      label: 'Stay at Bottom',
+      type: 'checkbox',
+      checked: settings.stayAtBottom,
+      click: (item) => {
+        settings.stayAtBottom = item.checked;
+        saveSettings();
+        sendToRenderer('update-settings', { stayAtBottom: item.checked });
+        updateTrayMenu();
+      }
+    },
+    {
+      label: 'Idle / Free',
       type: 'checkbox',
       checked: settings.isParked,
       click: (item) => {
         settings.isParked = item.checked;
         saveSettings();
-        sendToRenderer('menu-action', item.checked ? 'idle-park' : 'poke');
+        sendToRenderer('menu-action', item.checked ? 'idle-park' : 'free');
         updateTrayMenu();
       }
     },

@@ -51,7 +51,8 @@ public enum ScreenNavigator {
     public static func pickTarget(screens: [ScreenRect],
                                   margin: Double = 40,
                                   winWidth: Double = 256,
-                                  petHeight: Double = 120) -> WalkTarget? {
+                                  petHeight: Double = 120,
+                                  stayAtBottom: Bool = false) -> WalkTarget? {
         guard !screens.isEmpty else { return nil }
         let index = Int.random(in: 0..<screens.count)
         let screen = screens[index]
@@ -63,7 +64,12 @@ public enum ScreenNavigator {
         let rangeY = screen.height - insetY * 2 - petHeight
         
         let x = rangeX > 0 ? screen.minX + insetX + Double.random(in: 0...rangeX) : screen.centerX
-        let y = rangeY > 0 ? screen.minY + insetY + Double.random(in: 0...rangeY) : screen.minY
+        let y: Double
+        if stayAtBottom {
+            y = screen.minY
+        } else {
+            y = rangeY > 0 ? screen.minY + insetY + Double.random(in: 0...rangeY) : screen.minY
+        }
         
         return WalkTarget(screenIndex: index, x: x, y: y)
     }

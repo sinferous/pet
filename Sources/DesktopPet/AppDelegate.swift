@@ -42,6 +42,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         if settings.waterReminders { waterReminder?.enable() }
 
         petWindowController = PetWindowController(behavior: behavior)
+        if settings.stayAtBottom {
+            petWindowController?.setStayAtBottom(true)
+        }
         petWindowController?.show()
 
         reminderTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
@@ -69,6 +72,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             },
             customReminderHandler: { [weak self] in
                 self?.showCustomReminderDialog()
+            },
+            stayAtBottomHandler: { [weak petWindowController] stay in
+                petWindowController?.setStayAtBottom(stay)
             })
 
         petWindowController?.onRightClick = { [weak statusItemController] in

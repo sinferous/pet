@@ -1,6 +1,6 @@
-# UNTIL NOW: Luna Mobile Evolution
+# UNTIL NOW: Luna Evolution & Change Log
 
-This file documents the milestones, architecture, and current state of the **Luna Mobile** development effort. It serves as an easy reference for project history, features, and file organization.
+This file documents the milestones, architecture, recent features, and bug fixes across all platforms (**macOS**, **Windows**, and **Android**). It serves as the living changelog and central reference for project history, features, and file organization. All significant changes and updates should be documented here.
 
 ---
 
@@ -123,3 +123,21 @@ android/
 
 ### 🛡️ System Launcher & Home Filters
 *   **Ignored Packages:** Added filter rules inside `onAppChanged()` (Javascript) to ignore active packages containing the keywords `"launcher"`, `"home"`, or `"system"`. This prevents speech bubble alerts from showing when the user exits to the home screen (e.g., Google's *Nexus Launcher* or Samsung's *One UI Home*).
+
+### 🍏 macOS Hit-Testing & Hydration Alert Fixes
+*   **Headroom Click & Scroll Pass-Through:** Removed global `NSEvent.pressedMouseButtons != 0` check in `updateIgnoreMouseEvents()`. Mouse hovers, clicks, and scroll wheel events in the 200px transparent headroom above Luna now pass through 100% directly to underlying desktop windows and applications.
+*   **Expanded Drag Hitbox & Interactive Area:** Applied padded bounding boxes (`insetBy(dx: -4, dy: -4)`) and alpha threshold `>= 4` in [PetScene.swift](file:///j:/Work/Webtree%20Online/Desktop%20pet/Sources/DesktopPet/PetScene.swift) and [PetWindow.swift](file:///j:/Work/Webtree%20Online/Desktop%20pet/Sources/DesktopPet/PetWindow.swift), making Luna's body responsive to clicks and dragging without requiring pixel-perfect precision.
+*   **Hydration Alert Run-Away Fix:** Padded close button hit bounds (`insetBy(dx: -6, dy: -6)`) so clicks on the speech bubble `×` button reliably close the alert. Updated `onCloseSpeechBubble` in [PetWindowController.swift](file:///j:/Work/Webtree%20Online/Desktop%20pet/Sources/DesktopPet/PetWindowController.swift) to clear hydration locks, unpark `BehaviorMachine`, and immediately trigger `.run` to a new random location.
+
+### 📌 "Stay at Bottom" Mode (Windows & macOS)
+*   **Persistent Setting:** Added **"Stay at Bottom"** checkbox toggle to both Windows tray menu ([main.js](file:///j:/Work/Webtree%20Online/Desktop%20pet/desktop/main.js)) and macOS menu bar ([StatusItemController.swift](file:///j:/Work/Webtree%20Online/Desktop%20pet/Sources/DesktopPet/Services/StatusItemController.swift)), saving preference in `settings.json` / `UserDefaults`.
+*   **Bottom Floor Movement Locking:** When enabled, target coordinate calculation ([ScreenNavigator](file:///j:/Work/Webtree%20Online/Desktop%20pet/Sources/DesktopPetCore/Navigation/ScreenNavigator.swift)) locks Y to the screen floor (`minY` on Mac, `maxY - winHeight` on Windows).
+*   **Action & Drag Clamping:** Hydration runs, custom reminders, and manual mouse dragging remain strictly clamped to the bottom edge in front of the taskbar/dock until disabled.
+
+### 🅿️ "Idle / Free" Mode (Windows & macOS)
+*   **Menu Item Renaming:** Simplified the control menu options by removing legacy terms like "Poke" and renaming the menu item to **"Idle / Free"**.
+*   **Checked = Idle:** When **"Idle / Free"** is checked (ON), Luna sits at the bottom-left corner of the primary display (`screen.frame.minX + 12`, `screen.frame.minY`) and stays there permanently (automatically walking back if manually dragged).
+*   **Unchecked = Free:** When **"Idle / Free"** is unchecked (OFF), Luna is set free to roam around normally.
+
+
+

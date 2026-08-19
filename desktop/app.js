@@ -151,7 +151,31 @@ async function initScreens() {
   }
 }
 
+let isStayAtBottom = false;
+
+if (isElectron) {
+  ipcRenderer.invoke('get-settings').then(s => {
+    if (s && typeof s.stayAtBottom === 'boolean') {
+      isStayAtBottom = s.stayAtBottom;
+    }
+  });
+  ipcRenderer.on('update-settings', (event, s) => {
+    if (s && typeof s.stayAtBottom === 'boolean') {
+      isStayAtBottom = s.stayAtBottom;
+      if (isStayAtBottom && screens.length > 0) {
+        windowY = screens[0].maxY - petHeight;
+        updateWindowBounds();
+      }
+    }
+  });
+}
+
 function updateWindowBounds() {
+  if (isStayAtBottom && screens.length > 0) {
+    let s = screens.find(scr => scr.contains(windowX, windowY)) || screens[0];
+    windowY = s.maxY - petHeight;
+  }
+
   let yOffset = 0;
   if (currentAnim === 'jump') {
     if (currentFrameIndex === 1) {
@@ -172,7 +196,7 @@ function updateWindowBounds() {
 // Ticks walk progress
 function startWalk() {
   if (screens.length === 0) return;
-  walkTarget = ScreenNavigator.pickTarget(screens);
+  walkTarget = ScreenNavigator.pickTarget(screens, 40, petWidth, petHeight, 0, isStayAtBottom);
 }
 
 function advanceWalk() {
@@ -288,7 +312,11 @@ window.addEventListener('mousemove', async (e) => {
   }
   if (s) {
     windowX = Math.max(s.minX, Math.min(s.maxX - petWidth, windowX));
-    windowY = Math.max(s.minY, Math.min(s.maxY - petHeight, windowY));
+    if (isStayAtBottom) {
+      windowY = s.maxY - petHeight;
+    } else {
+      windowY = Math.max(s.minY, Math.min(s.maxY - petHeight, windowY));
+    }
   }
   updateWindowBounds();
 });
@@ -640,7 +668,7 @@ function triggerWaterHydrationFlow() {
   if (screens.length === 0) return;
   const s = screens[0];
   const targetX = s.minX + (s.width - petWidth) / 2;
-  const targetY = s.minY + (s.height - petHeight) / 2;
+  const targetY = isStayAtBottom ? s.maxY - petHeight : s.minY + (s.height - petHeight) / 2;
   hydrationWalkTarget = { x: targetX, y: targetY };
   currentAnim = 'run';
   currentFrameIndex = 0;
@@ -763,7 +791,7 @@ function triggerCustomReminder(message) {
   const s = screens[0];
   
   const targetX = s.minX + (s.width - petWidth) / 2;
-  const targetY = s.minY + (s.height - winHeight) / 2 - 100;
+  const targetY = isStayAtBottom ? s.maxY - petHeight : s.minY + (s.height - petHeight) / 2 - 100;
   
   hydrationWalkTarget = { x: targetX, y: targetY };
   behavior.setParked(true);   // freeze machine decisions

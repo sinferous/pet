@@ -50,13 +50,13 @@ final class PetSKView: SKView {
             if let closeNode = scene.childNode(withName: "//closeButton"),
                let bubble = closeNode.parent {
                 let bubblePt = bubble.convert(scenePt, from: scene)
-                if closeNode.contains(bubblePt) {
+                if closeNode.frame.insetBy(dx: -6, dy: -6).contains(bubblePt) {
                     return super.hitTest(point)
                 }
             }
         }
         
-        if let alpha = alphaProvider?(point), alpha < 8 {
+        if let alpha = alphaProvider?(point), alpha < 4 {
             return nil // click falls through
         }
         return super.hitTest(point)

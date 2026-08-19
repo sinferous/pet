@@ -12,6 +12,7 @@ final class SettingsStore {
         case waterReminders
         case waterIntervalMinutes
         case autoStart
+        case stayAtBottom
     }
 
     // MARK: - Properties
@@ -40,6 +41,11 @@ final class SettingsStore {
     var autoStart: Bool {
         get { defaults.object(forKey: Key.autoStart.rawValue) as? Bool ?? false } // off by default
         set { defaults.set(newValue, forKey: Key.autoStart.rawValue) }
+    }
+
+    var stayAtBottom: Bool {
+        get { defaults.object(forKey: Key.stayAtBottom.rawValue) as? Bool ?? false } // off by default
+        set { defaults.set(newValue, forKey: Key.stayAtBottom.rawValue) }
     }
 
     private init() {}
