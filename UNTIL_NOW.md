@@ -133,11 +133,20 @@ android/
 *   **Persistent Setting:** Added **"Stay at Bottom"** checkbox toggle to both Windows tray menu ([main.js](file:///j:/Work/Webtree%20Online/Desktop%20pet/desktop/main.js)) and macOS menu bar ([StatusItemController.swift](file:///j:/Work/Webtree%20Online/Desktop%20pet/Sources/DesktopPet/Services/StatusItemController.swift)), saving preference in `settings.json` / `UserDefaults`.
 *   **Bottom Floor Movement Locking:** When enabled, target coordinate calculation ([ScreenNavigator](file:///j:/Work/Webtree%20Online/Desktop%20pet/Sources/DesktopPetCore/Navigation/ScreenNavigator.swift)) locks Y to the screen floor (`minY` on Mac, `maxY - winHeight` on Windows).
 *   **Action & Drag Clamping:** Hydration runs, custom reminders, and manual mouse dragging remain strictly clamped to the bottom edge in front of the taskbar/dock until disabled.
+*   **Smooth Run-Down Transition:** Toggling "Stay at Bottom" ON triggers Luna to play her `.run` animation and sprint down to the bottom floor smoothly instead of teleporting.
 
 ### 🅿️ "Idle / Free" Mode (Windows & macOS)
 *   **Menu Item Renaming:** Simplified the control menu options by removing legacy terms like "Poke" and renaming the menu item to **"Idle / Free"**.
 *   **Checked = Idle:** When **"Idle / Free"** is checked (ON), Luna sits at the bottom-left corner of the primary display (`screen.frame.minX + 12`, `screen.frame.minY`) and stays there permanently (automatically walking back if manually dragged).
 *   **Unchecked = Free:** When **"Idle / Free"** is unchecked (OFF), Luna is set free to roam around normally.
+
+### 🖥️ Windows Renderer Architecture & Taskbar Alignment Fixes
+*   **Modular HTML Renderer ([desktop/index.html](file:///j:/Work/Webtree%20Online/Desktop%20pet/desktop/index.html)):** Removed 1,600+ lines of duplicated, broken inline JavaScript scripts and modularized `index.html` to import `<script src="behavior.js"></script>` and `<script src="app.js"></script>`.
+*   **Canvas Aspect Ratio Fix ([desktop/index.html](file:///j:/Work/Webtree%20Online/Desktop%20pet/desktop/index.html#L42)):** Set `<canvas id="petCanvas" width="128" height="320">` to match container height (320px) 1:1, eliminating vertical sprite stretching.
+*   **Hit-Testing & Headroom Alignment ([desktop/app.js](file:///j:/Work/Webtree%20Online/Desktop%20pet/desktop/app.js#L200-L320)):** Rendered Luna at `y = headroom` (`200..320`) and aligned hit-testing pixel alpha checks to `y = headroom..winHeight`, resolving the mouse click pass-through bug.
+*   **Taskbar Floor Alignment (`winHeight = 320px`):** Updated window Y calculations to use `s.maxY - winHeight` (320px window offset) and `display.workArea` (usable space above taskbar). Luna now rests directly on top of the Windows taskbar in plain view, eliminating the bug where she sank off-screen.
+*   **Movement Loop Drivers:** Added `advanceWalk(runSpeed)` and `advanceRoll()` movement drivers to the main loop for `PetState.run` and `PetState.roll`.
+*   **Exhaustive Function & Particle Definitions:** Restored all particle, celebration, speech, and timer helper functions (`startLove`, `startCheer`, `startWoolBall`, `spawnConfettiBurst`, `spawnHeartEmoji`, `updateEffects`, `drawEffects`, `isPromptDialogOpen`, `scheduleWaterReminder`, etc.) into `desktop/app.js`, completely resolving runtime `ReferenceError` exception banners.
 
 
 
