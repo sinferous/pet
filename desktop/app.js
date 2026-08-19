@@ -683,9 +683,7 @@ behavior.onStateChange = (state) => {
       pendingCustomReminderMessage = null;
     }
   } else if (state === PetState.react) {
-    const reacts = ["Purrrrr...", "Prrrr! ❤️", "Mrrrp! ♪", "Meow~", "Purrrrrr..."];
-    const idx = Math.floor(Math.random() * reacts.length);
-    showSpeechBubble(reacts[idx], false);
+    // React/shy state plays animation but shows no voice bubble as requested
   }
 };
 
