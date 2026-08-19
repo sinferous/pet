@@ -378,6 +378,14 @@ const ScreenNavigator = {
   }
 };
 
+if (typeof window !== 'undefined') {
+  window.ScreenRect = ScreenRect;
+  window.PetState = PetState;
+  window.PetAnimation = PetAnimation;
+  window.BehaviorMachine = BehaviorMachine;
+  window.ScreenNavigator = ScreenNavigator;
+}
+
 if (typeof module === 'object' && module !== null && typeof module.exports === 'object') {
   module.exports = {
     ScreenRect,
@@ -386,10 +394,4 @@ if (typeof module === 'object' && module !== null && typeof module.exports === '
     BehaviorMachine,
     ScreenNavigator
   };
-} else {
-  window.ScreenRect = ScreenRect;
-  window.PetState = PetState;
-  window.PetAnimation = PetAnimation;
-  window.BehaviorMachine = BehaviorMachine;
-  window.ScreenNavigator = ScreenNavigator;
 }

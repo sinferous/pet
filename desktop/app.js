@@ -582,6 +582,10 @@ let animTime = 0;
 // 60Hz Loop
 let lastTime = performance.now();
 
+function loop(now) {
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+
   const bubble = document.getElementById('speechBubble');
   const isBubbleActive = bubble && bubble.style.display === 'block';
 
@@ -603,6 +607,18 @@ let lastTime = performance.now();
         } else {
           behavior.enter(PetState.drink);
         }
+      }
+    } else if (parkWalkTarget) {
+      // Strolling to park corner (bottom-left)
+      const step = ScreenNavigator.step(windowX, windowY, parkWalkTarget.x, parkWalkTarget.y, walkSpeed * 1.5, screens, petWidth, petHeight);
+      facing = step.facing;
+      windowX = step.x;
+      windowY = step.y;
+      updateWindowBounds();
+      currentAnim = 'walk';
+      if (Math.hypot(windowX - parkWalkTarget.x, windowY - parkWalkTarget.y) < walkSpeed * 1.5 * 1.5) {
+        parkWalkTarget = null;
+        currentAnim = 'idle';
       }
     } else if (behavior.state === PetState.walk) {
       advanceWalk();
@@ -676,15 +692,30 @@ function triggerWaterHydrationFlow() {
   behavior.setParked(true);
 }
 
-// Water Reminder preview trigger (every 10 seconds for testing)
-setInterval(() => {
-  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-    new Notification('Luna', {
-      body: 'Time to drink some water! 💧'
-    });
-  }
-  triggerWaterHydrationFlow();
-}, 10000);
+let parkWalkTarget = null;
+let isManuallyParked = false;
+
+function parkPet() {
+  if (screens.length === 0) return;
+  const s = screens[0];
+  parkWalkTarget = { x: s.minX + 12, y: s.maxY - petHeight };
+  behavior.setParked(true);
+  walkTarget = null;
+  currentAnim = 'walk';
+  currentFrameIndex = 0;
+  animTime = 0;
+  isManuallyParked = true;
+}
+
+function pokePet() {
+  parkWalkTarget = null;
+  behavior.setParked(false);
+  isManuallyParked = false;
+  currentAnim = 'idle';
+}
+
+window.parkPet = parkPet;
+window.pokePet = pokePet;
 
 // Request notification permission in browser mode
 if (!isElectron && typeof Notification !== 'undefined' && Notification.requestPermission) {
@@ -822,6 +853,22 @@ setInterval(() => {
   const state = Math.random() < 0.5 ? PetState.walk : PetState.run;
   behavior.enter(state);
 }, 60000);
+
+if (isElectron) {
+  ipcRenderer.on('menu-action', (event, action, data) => {
+    if (action === 'idle-park') {
+      parkPet();
+    } else if (action === 'poke' || action === 'free') {
+      pokePet();
+    } else if (action === 'say') {
+      showSayBubble();
+    } else if (action === 'trigger-state') {
+      triggerState(data);
+    } else if (action === 'prompt-custom-reminder') {
+      showReminderDialog();
+    }
+  });
+}
 
 // Start Application
 preloadImages(() => {
