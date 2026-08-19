@@ -1020,13 +1020,7 @@ setInterval(() => {
   });
 }, 10000);
 
-setInterval(() => {
-  if (behavior.state === PetState.idle || behavior.state === PetState.walk) {
-    if (Math.random() < 0.35) {
-      triggerRandomMeow();
-    }
-  }
-}, 10000);
+
 
 setInterval(() => {
   if (hydrationWalkTarget || isPromptDialogOpen || isReminderDialogOpen || isDragging || isWaterReminderActive || isManuallyParked) return;
