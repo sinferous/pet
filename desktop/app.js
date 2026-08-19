@@ -23,6 +23,8 @@ const container = document.getElementById('petContainer');
 // Target Dimensions
 const petWidth = 128;
 const petHeight = 120;
+const headroom = 200;
+const winHeight = petHeight + headroom; // 320px total window height
 
 // Preload SVG assets
 const animations = {
@@ -251,15 +253,12 @@ container.addEventListener('mousedown', async (e) => {
     const pixel = ctx.getImageData(x, y, 1, 1).data;
     alpha = pixel[3];
   } catch (err) {
-    // Bounding box fallback: ignore click if it's on outer transparent borders
-    if (x < 15 || x > 113 || y < 15 || y > 115) {
+    if (x < 10 || x > 118 || y < headroom + 10 || y > winHeight - 5) {
       alpha = 0;
-    } else {
-      console.warn('Bypassing canvas transparency check due to browser security restrictions.');
     }
   }
 
-  if (alpha < 8) {
+  if (alpha < 4) {
     wasPressedOnCat = false;
     return; // ignore transparent clicks
   }
@@ -383,15 +382,15 @@ function handleMouseMove(e) {
   const y = e.clientY - rect.top;
 
   let ignore = true;
-  if (x >= 10 && x < 118 && y >= 200 && y < 320) {
+  if (x >= 0 && x < petWidth && y >= headroom && y < winHeight) {
     if (isElectron && process.platform === 'linux') {
       ignore = false;
     } else {
       try {
         const pixel = ctx.getImageData(x, y, 1, 1).data;
-        ignore = pixel[3] < 8;
+        ignore = pixel[3] < 4;
       } catch (err) {
-        ignore = false;
+        ignore = !(x >= 10 && x < 118 && y >= headroom + 10 && y < winHeight - 5);
       }
     }
   }
@@ -426,17 +425,17 @@ if (isElectron) {
     const x = pos.x - rect.left;
     const y = pos.y - rect.top;
     
-    if (x >= 0 && x < petWidth && y >= 0 && y < petHeight) {
+    if (x >= 0 && x < petWidth && y >= headroom && y < winHeight) {
       let alpha = 255;
       try {
         const pixel = ctx.getImageData(x, y, 1, 1).data;
         alpha = pixel[3];
       } catch (err) {
-        if (x < 15 || x > 113 || y < headroom + 15 || y > headroom + 115) {
+        if (x < 15 || x > 113 || y < headroom + 15 || y > winHeight - 5) {
           alpha = 0;
         }
       }
-      const ignore = alpha < 8;
+      const ignore = alpha < 4;
       ipcRenderer.send('set-ignore-mouse-events', ignore);
     } else {
       ipcRenderer.send('set-ignore-mouse-events', true);
@@ -645,7 +644,7 @@ function loop(now) {
     currentFrameIndex = Math.floor(animTime * fps) % frames.length;
     const img = frames[currentFrameIndex];
 
-    ctx.clearRect(0, 0, petWidth, petHeight);
+    ctx.clearRect(0, 0, petWidth, winHeight);
     ctx.save();
 
     if (facing === 'left') {
@@ -653,7 +652,7 @@ function loop(now) {
       ctx.scale(-1, 1);
     }
 
-    ctx.drawImage(img, 0, 0, petWidth, petHeight);
+    ctx.drawImage(img, 0, headroom, petWidth, petHeight);
     ctx.restore();
 
     // Draw Zzz overlay for Sleep (after restore, so it is never inverted)
@@ -666,9 +665,9 @@ function loop(now) {
       const isLeft = facing === 'left';
       const zX = isLeft ? petWidth * 0.22 : petWidth * 0.68;
       
-      ctx.fillText('Z', zX, petHeight * 0.28 + bobZ);
+      ctx.fillText('Z', zX, headroom + petHeight * 0.28 + bobZ);
       ctx.font = 'bold 13px monospace';
-      ctx.fillText('z', zX + (isLeft ? 15 : -15), petHeight * 0.40 + bobZ);
+      ctx.fillText('z', zX + (isLeft ? 15 : -15), headroom + petHeight * 0.40 + bobZ);
       ctx.restore();
     }
   }
