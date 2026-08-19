@@ -216,6 +216,22 @@ function advanceWalk(speed = walkSpeed) {
   }
 }
 
+function advanceRoll() {
+  if (screens.length === 0) return;
+  let s = screens.find(scr => scr.contains(windowX + petWidth / 2, windowY + petHeight / 2)) || screens[0];
+  let x = windowX + rollDir * rollSpeed;
+  if (x <= s.minX) {
+    x = s.minX + 0.1;
+    rollDir = 1;
+  } else if (x >= s.maxX - petWidth) {
+    x = s.maxX - petWidth - 0.1;
+    rollDir = -1;
+  }
+  windowX = x;
+  facing = rollDir > 0 ? 'right' : 'left';
+  updateWindowBounds();
+}
+
 // Ticks cursor follow behavior
 async function advanceFollow() {
   let mouse;
@@ -620,7 +636,11 @@ function loop(now) {
         currentAnim = 'idle';
       }
     } else if (behavior.state === PetState.walk) {
-      advanceWalk();
+      advanceWalk(walkSpeed);
+    } else if (behavior.state === PetState.run) {
+      advanceWalk(runSpeed);
+    } else if (behavior.state === PetState.roll) {
+      advanceRoll();
     } else if (behavior.state === PetState.follow) {
       advanceFollow();
     } else if (behavior.state === PetState.idle) {
